@@ -235,17 +235,47 @@ sendWhatsAppButton.addEventListener('click', () => {
   showFeedback('WhatsApp aberto com a mensagem preenchida.');
 });
 
-sendEmailButton.addEventListener('click', () => {
+sendEmailButton.addEventListener('click', async () => {
   const { emailDestino } = getDeliverySettings();
   if (!emailDestino) {
     showFeedback('Informe o e-mail de destino no topo do formulário.', true);
     return;
   }
 
-  const subject = encodeURIComponent('Nova ficha de captação - Meular Imóveis');
-  const body = encodeURIComponent(formatFormData(collectFormData()));
-  globalThis.location.href = `mailto:${emailDestino}?subject=${subject}&body=${body}`;
-  showFeedback('Cliente de e-mail aberto com os dados do formulário.');
+  const payload = {
+    ...collectFormData(),
+    emailDestino,
+    protocolo: protocolValue.textContent === 'AGUARDANDO' ? generateProtocol() : protocolValue.textContent,
+    horarioRegistro: new Date().toLocaleString('pt-BR'),
+  };
+
+  try {
+    if (globalThis.location.protocol === 'file:') {
+      throw new Error('BACKEND_LOCAL_INDISPONIVEL');
+    }
+
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json().catch(() => ({ ok: false }));
+
+    if (!response.ok || !result.ok) {
+      throw new Error(result.message || 'Falha ao enviar e-mail pelo backend.');
+    }
+
+    showFeedback('E-mail enviado automaticamente com sucesso pelo backend.');
+  } catch (error) {
+    console.error(error);
+    const subject = encodeURIComponent('Nova ficha de captação - Meular Imóveis');
+    const body = encodeURIComponent(formatFormData(payload));
+    globalThis.location.href = `mailto:${emailDestino}?subject=${subject}&body=${body}`;
+    showFeedback('O backend de e-mail ainda não está acessível neste ambiente. O e-mail foi aberto como alternativa.', true);
+  }
 });
 
 savePdfButton.addEventListener('click', () => {
