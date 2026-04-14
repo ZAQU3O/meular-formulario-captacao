@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ficha de Captação - Meular Imóveis</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="logo-wrap">
+          <img src="assets/img/logo.png" alt="Logo Meular Imóveis" class="brand-image" />
+        </div>
+        <p class="eyebrow">CAPTAÇÃO ONLINE</p>
+        <h1>Ficha de Captação</h1>
+        <p class="subtitle">Formulário profissional personalizado para a Meular Imóveis registrar proprietários, imóveis e condições comerciais.</p>
+      </div>
+      <div class="brand-card">
+        <strong>meular imóveis</strong>
+        <span>Atendimento imobiliário com apresentação elegante e prática.</span>
+      </div>
+    </header>
+
+    <form id="captacaoForm" class="form-grid">
+      <section class="card full channel-card">
+        <h2>Canais de entrega</h2>
+        <div class="grid cols-3">
+          <label>E-mail de destino
+            <input type="email" id="emailDestino" name="emailDestino" placeholder="comercial@suaempresa.com" value="bartworld14@gmail.com" />
+          </label>
+          <label>WhatsApp de destino
+            <input type="tel" id="whatsappDestino" name="whatsappDestino" placeholder="5586999999999" value="+55 89 99411-1573" />
+          </label>
+          <label>Webhook do Google Sheets
+            <input type="url" id="webhookPlanilha" name="webhookPlanilha" placeholder="Cole aqui a URL do Apps Script" value="https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec" />
+          </label>
+        </div>
+        <p class="channel-tip">Preencha esses campos uma vez para usar envio por e-mail, WhatsApp e planilha.</p>
+      </section>
+
+      <section class="card full">
+        <h2>Dados do Corretor</h2>
+        <div class="grid cols-2">
+          <label>Nome do corretor*
+            <input type="text" name="corretor" required />
+          </label>
+          <label>Data da captação*
+            <input type="date" name="dataCaptacao" required />
+          </label>
+        </div>
+      </section>
+
+      <section class="card full">
+        <h2>Dados do Proprietário</h2>
+        <div class="grid cols-3">
+          <label>Nome do Proprietário*
+            <input type="text" name="proprietario" required />
+          </label>
+          <label>RG
+            <input type="text" name="rg" />
+          </label>
+          <label>E-mail
+            <input type="email" name="email" />
+          </label>
+          <label>CPF
+            <input type="text" name="cpf" placeholder="000.000.000-00" />
+          </label>
+          <label>Celular
+            <input type="tel" name="celular" placeholder="(00) 00000-0000" />
+          </label>
+          <label>Estado Civíl
+            <select name="estadoCivil">
+              <option value="">Selecione...</option>
+              <option>Solteiro(a)</option>
+              <option>Casado(a)</option>
+              <option>Divorciado(a)</option>
+              <option>Viúvo(a)</option>
+              <option>União estável</option>
+            </select>
+          </label>
+          <label>Nome do cônjuge
+            <input type="text" name="conjuge" />
+          </label>
+          <label>RG do cônjuge
+            <input type="text" name="rgConjuge" />
+          </label>
+          <label>E-mail do cônjuge
+            <input type="email" name="emailConjuge" />
+          </label>
+          <label>Em caráter de EXCLUSIVIDADE
+            <select name="exclusividade">
+              <option value="">Selecione...</option>
+              <option>Sim</option>
+              <option>Não</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="card full">
+        <h2>Dados do Imóvel</h2>
+        <div class="grid cols-3">
+          <label>Endereço
+            <input type="text" name="endereco" />
+          </label>
+          <label>Nome do Condomínio
+            <input type="text" name="condominio" />
+          </label>
+          <label>Nº da Unidade
+            <input type="text" name="unidade" />
+          </label>
+          <label>Bairro
+            <input type="text" name="bairro" />
+          </label>
+          <label>CEP
+            <input type="text" name="cep" />
+          </label>
+          <label>Matrícula do Imóvel
+            <input type="text" name="matricula" />
+          </label>
+          <label>Valor do Imóvel
+            <input type="number" name="valor" min="0" step="0.01" />
+          </label>
+          <label>CPF
+            <input type="text" name="cpfImovel" placeholder="000.000.000-00" />
+          </label>
+          <label>Celular
+            <input type="tel" name="celularImovel" placeholder="(00) 00000-0000" />
+          </label>
+          <label>Tipo do Imóvel
+            <select name="tipoImovel">
+              <option value="">Selecione...</option>
+              <option>Casa</option>
+              <option>Apartamento</option>
+              <option>Terreno</option>
+              <option>Sala comercial</option>
+              <option>Galpão</option>
+              <option>Outro</option>
+            </select>
+          </label>
+          <label class="full-width">Descrição do Imóvel
+            <textarea name="descricaoImovel" rows="4" placeholder="Descreva as características do imóvel..."></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="card full">
+        <h2>Condições Comerciais</h2>
+        <p class="terms">
+          Autorizo a <strong>Meular Imóveis</strong> a intermediar a venda do imóvel descrito neste formulário.
+          Pela conclusão do negócio, fica estipulado honorários de <strong>5%</strong> sobre o valor final da venda,
+          válidos durante o prazo de captação acordado entre as partes.
+        </p>
+      </section>
+
+      <section class="card full">
+        <h2>Observações</h2>
+        <label>Observações gerais
+          <textarea name="observacoes" rows="5" placeholder="Informações adicionais sobre o imóvel, negociação ou condições especiais..."></textarea>
+        </label>
+      </section>
+
+      <section class="card full signatures">
+        <h2>Assinaturas</h2>
+        <div class="grid cols-2">
+          <div class="signature-block">
+            <label for="assinaturaNomeProprietario">Nome do proprietário</label>
+            <input id="assinaturaNomeProprietario" type="text" name="assinaturaProprietario" placeholder="Nome completo" />
+            <p class="signature-help">Assine no quadro abaixo com o dedo ou mouse.</p>
+            <canvas id="signaturePadProprietario" class="signature-pad" width="460" height="180"></canvas>
+            <input type="hidden" name="assinaturaProprietarioImagem" id="assinaturaProprietarioImagem" />
+            <button type="button" class="secondary clear-signature" data-target="signaturePadProprietario">Limpar assinatura</button>
+          </div>
+          <div class="signature-block">
+            <label for="assinaturaNomeImobiliaria">Responsável da imobiliária</label>
+            <input id="assinaturaNomeImobiliaria" type="text" name="assinaturaImobiliaria" placeholder="Responsável" />
+            <p class="signature-help">Assine no quadro abaixo com o dedo ou mouse.</p>
+            <canvas id="signaturePadImobiliaria" class="signature-pad" width="460" height="180"></canvas>
+            <input type="hidden" name="assinaturaImobiliariaImagem" id="assinaturaImobiliariaImagem" />
+            <button type="button" class="secondary clear-signature" data-target="signaturePadImobiliaria">Limpar assinatura</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="actions full">
+        <button type="button" id="fillTestData" class="secondary">Preencher teste</button>
+        <button type="submit">Salvar dados</button>
+        <button type="button" id="sendWhatsApp">Enviar por WhatsApp</button>
+        <button type="button" id="sendEmail">Enviar por E-mail</button>
+        <button type="button" id="savePdf" class="secondary">Salvar em PDF</button>
+        <button type="button" id="saveSheets" class="secondary">Enviar para Google Sheets</button>
+      </div>
+    </form>
+
+    <div id="successMessage" class="success success-panel hidden">
+      <div class="success-header">
+        <strong>Atendimento registrado</strong>
+        <span class="success-badge">Pronto para envio</span>
+      </div>
+      <p id="successText" class="success-text">Formulário pronto. Use os botões acima para salvar, enviar ou registrar os dados.</p>
+      <div class="success-meta">
+        <div>
+          <small>Protocolo</small>
+          <strong id="protocolValue">AGUARDANDO</strong>
+        </div>
+        <div>
+          <small>Horário</small>
+          <strong id="timestampValue">--:--</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
