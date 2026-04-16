@@ -5,9 +5,14 @@ const protocolValue = document.getElementById('protocolValue');
 const timestampValue = document.getElementById('timestampValue');
 const fillTestDataButton = document.getElementById('fillTestData');
 const sendWhatsAppButton = document.getElementById('sendWhatsApp');
-const sendEmailButton = document.getElementById('sendEmail');
+const savePdfButton = document.getElementById('savePdf');
 
-// EmailJS config
+// ─── Configurações da empresa (não visíveis ao usuário) ───────────────────────
+const EMAIL_DESTINO = 'bartworld14@gmail.com';
+const WEBHOOK_PLANILHA = 'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec';
+const WHATSAPP_DESTINO = '558994111573';
+
+// ─── EmailJS config ───────────────────────────────────────────────────────────
 const EMAILJS_SERVICE_ID = 'service_935b0pu';
 const EMAILJS_TEMPLATE_ID = 'template_74ix2rt';
 const EMAILJS_PUBLIC_KEY = 'Tp3KkqmXfULnu2dl2';
@@ -149,22 +154,11 @@ function setupSignaturePad(canvasId, inputId) {
   };
 }
 
-function getDeliverySettings() {
-  return {
-    emailDestino: document.getElementById('emailDestino').value.trim(),
-    whatsappDestino: document.getElementById('whatsappDestino').value.replaceAll(/\D/g, ''),
-    webhookPlanilha: document.getElementById('webhookPlanilha').value.trim(),
-  };
-}
-
 function collectFormData() {
   const rawData = Object.fromEntries(new FormData(form).entries());
   const excludedKeys = new Set([
     'assinaturaProprietarioImagem',
     'assinaturaImobiliariaImagem',
-    'emailDestino',
-    'whatsappDestino',
-    'webhookPlanilha',
   ]);
   const data = {};
 
@@ -237,81 +231,70 @@ fillTestDataButton.addEventListener('click', () => {
   showFeedback('Dados de teste preenchidos. Agora você pode clicar em qualquer opção de envio.');
 });
 
-form.addEventListener('submit', function (event) {
+// ─── Submit principal: envia e-mail + Google Sheets automaticamente ──────────
+form.addEventListener('submit', async function (event) {
   event.preventDefault();
-  const data = collectFormData();
-  console.log('Dados do formulário:', data);
-  showFeedback('Dados salvos no navegador. Agora você pode enviar por WhatsApp, e-mail, PDF ou Google Sheets.');
-});
 
-sendWhatsAppButton.addEventListener('click', () => {
-  const { whatsappDestino } = getDeliverySettings();
-  if (!whatsappDestino) {
-    showFeedback('Informe o número de WhatsApp de destino no topo do formulário.', true);
-    return;
-  }
-
-  const texto = encodeURIComponent(`Nova ficha de captação\n\n${formatFormData(collectFormData())}`);
-  globalThis.open(`https://wa.me/${whatsappDestino}?text=${texto}`, '_blank');
-  showFeedback('WhatsApp aberto com a mensagem preenchida.');
-});
-
-sendEmailButton.addEventListener('click', async () => {
-  const { emailDestino } = getDeliverySettings();
-  if (!emailDestino) {
-    showFeedback('Informe o e-mail de destino no topo do formulário.', true);
-    return;
-  }
+  const submitBtn = form.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Enviando...';
 
   const formData = collectFormData();
   const protocolo = protocolValue.textContent === 'AGUARDANDO' ? generateProtocol() : protocolValue.textContent;
-  const payload = {
-    ...formData,
-    protocolo,
-    to_email: emailDestino,
-    conteudo: buildEmailJsTable(formData),
-  };
+  updateProtocolInfo();
 
-  showFeedback('Enviando e-mail...');
+  let emailOk = false;
+  let sheetsOk = false;
+
+  // 1. Enviar e-mail via EmailJS
   try {
-    if (!globalThis.emailjs) {
-      throw new Error('EmailJS não carregado.');
-    }
+    const payload = {
+      ...formData,
+      protocolo,
+      to_email: EMAIL_DESTINO,
+      conteudo: buildEmailJsTable(formData),
+    };
     await sendEmailJs(payload);
-    showFeedback('E-mail enviado com sucesso via EmailJS!');
-  } catch (error) {
-    console.error(error);
-    showFeedback('Falha ao enviar e-mail via EmailJS. Verifique a configuração.', true);
+    emailOk = true;
+  } catch (err) {
+    console.error('Erro EmailJS:', err);
   }
+
+  // 2. Enviar para Google Sheets
+  try {
+    await fetch(WEBHOOK_PLANILHA, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ ...formData, protocolo }),
+    });
+    sheetsOk = true;
+  } catch (err) {
+    console.error('Erro Sheets:', err);
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Enviar Ficha';
+
+  if (emailOk && sheetsOk) {
+    showFeedback('Ficha enviada com sucesso! E-mail e planilha atualizados.');
+  } else if (emailOk) {
+    showFeedback('E-mail enviado, mas houve falha ao registrar na planilha.', true);
+  } else if (sheetsOk) {
+    showFeedback('Planilha atualizada, mas houve falha no envio do e-mail.', true);
+  } else {
+    showFeedback('Falha ao enviar. Verifique sua conexão e tente novamente.', true);
+  }
+});
+
+// ─── Botões opcionais ─────────────────────────────────────────────────────────
+sendWhatsAppButton.addEventListener('click', () => {
+  const texto = encodeURIComponent(`Nova ficha de captação\n\n${formatFormData(collectFormData())}`);
+  globalThis.open(`https://wa.me/${WHATSAPP_DESTINO}?text=${texto}`, '_blank');
+  showFeedback('WhatsApp aberto com a mensagem preenchida.');
 });
 
 savePdfButton.addEventListener('click', () => {
   globalThis.print();
   showFeedback('A janela de impressão foi aberta. Escolha Salvar como PDF.');
-});
-
-saveSheetsButton.addEventListener('click', async () => {
-  const { webhookPlanilha } = getDeliverySettings();
-  if (!webhookPlanilha) {
-    showFeedback('Informe a URL do webhook do Google Sheets no topo do formulário.', true);
-    return;
-  }
-
-  const payload = collectFormData();
-
-  try {
-    await fetch(webhookPlanilha, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    showFeedback('Dados enviados para o Google Sheets. Verifique a sua planilha.');
-  } catch (error) {
-    console.error(error);
-    showFeedback('Não foi possível enviar para o Google Sheets. Confira a URL do webhook.', true);
-  }
 });

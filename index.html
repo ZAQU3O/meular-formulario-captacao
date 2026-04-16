@@ -24,21 +24,7 @@
     </header>
 
     <form id="captacaoForm" class="form-grid">
-      <section class="card full channel-card">
-        <h2>Canais de entrega</h2>
-        <div class="grid cols-3">
-          <label>E-mail de destino
-            <input type="email" id="emailDestino" name="emailDestino" placeholder="comercial@suaempresa.com" value="bartworld14@gmail.com" />
-          </label>
-          <label>WhatsApp de destino
-            <input type="tel" id="whatsappDestino" name="whatsappDestino" placeholder="5586999999999" value="+55 89 99411-1573" />
-          </label>
-          <label>Webhook do Google Sheets
-            <input type="url" id="webhookPlanilha" name="webhookPlanilha" placeholder="Cole aqui a URL do Apps Script" value="https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec" />
-          </label>
-        </div>
-        <p class="channel-tip">Preencha esses campos uma vez para usar envio por e-mail, WhatsApp e planilha.</p>
-      </section>
+
 
       <section class="card full">
         <h2>Dados do Corretor</h2>
@@ -186,11 +172,9 @@
 
       <div class="actions full">
         <button type="button" id="fillTestData" class="secondary">Preencher teste</button>
-        <button type="submit">Salvar dados</button>
-        <button type="button" id="sendWhatsApp">Enviar por WhatsApp</button>
-        <button type="button" id="sendEmail">Enviar por E-mail</button>
+        <button type="submit">Enviar Ficha</button>
         <button type="button" id="savePdf" class="secondary">Salvar em PDF</button>
-        <button type="button" id="saveSheets" class="secondary">Enviar para Google Sheets</button>
+        <button type="button" id="sendWhatsApp" class="secondary">Enviar por WhatsApp</button>
       </div>
     </form>
 
