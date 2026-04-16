@@ -113,14 +113,17 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const secure = String(SMTP_SECURE || 'false').toLowerCase() === 'true';
     const transporter = nodemailer.createTransport({
       host: SMTP_HOST,
       port: Number(SMTP_PORT),
-      secure: String(SMTP_SECURE || 'false').toLowerCase() === 'true',
+      secure,
+      requireTLS: !secure,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
       },
+      tls: { rejectUnauthorized: false },
     });
 
     await transporter.sendMail({
@@ -135,6 +138,6 @@ module.exports = async (req, res) => {
     return res.status(200).json({ ok: true, message: 'E-mail enviado com sucesso.' });
   } catch (error) {
     console.error('Erro no envio de e-mail:', error);
-    return res.status(500).json({ ok: false, message: 'Falha ao enviar e-mail.' });
+    return res.status(500).json({ ok: false, message: 'Falha ao enviar e-mail.', detail: error.message, code: error.code });
   }
 };

@@ -6,6 +6,27 @@ const timestampValue = document.getElementById('timestampValue');
 const fillTestDataButton = document.getElementById('fillTestData');
 const sendWhatsAppButton = document.getElementById('sendWhatsApp');
 const sendEmailButton = document.getElementById('sendEmail');
+
+// EmailJS config
+const EMAILJS_SERVICE_ID = 'service_935b0pu';
+const EMAILJS_TEMPLATE_ID = 'template_74ix2rt';
+const EMAILJS_PUBLIC_KEY = 'Tp3KkqmXfULnu2dl2';
+
+function buildEmailJsTable(data) {
+  // Gera tabela HTML para o campo {{conteudo}}
+  let html = '<table class="data-table" style="border-collapse:collapse;width:100%;font-size:14px;">';
+  Object.entries(data).forEach(([key, value]) => {
+    if (labelMap[key] && String(value).trim() !== '') {
+      html += `<tr><td class="label" style="padding:8px 8px 4px 0;font-weight:700;color:#241b14;width:40%;border-bottom:1px solid #eee;">${labelMap[key]}</td><td class="value" style="padding:8px 0 4px 0;color:#444;border-bottom:1px solid #eee;">${value}</td></tr>`;
+    }
+  });
+  html += '</table>';
+  return html;
+}
+
+function sendEmailJs(payload) {
+  return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, payload, EMAILJS_PUBLIC_KEY);
+}
 const savePdfButton = document.getElementById('savePdf');
 const saveSheetsButton = document.getElementById('saveSheets');
 
@@ -242,39 +263,25 @@ sendEmailButton.addEventListener('click', async () => {
     return;
   }
 
+  const formData = collectFormData();
+  const protocolo = protocolValue.textContent === 'AGUARDANDO' ? generateProtocol() : protocolValue.textContent;
   const payload = {
-    ...collectFormData(),
-    emailDestino,
-    protocolo: protocolValue.textContent === 'AGUARDANDO' ? generateProtocol() : protocolValue.textContent,
-    horarioRegistro: new Date().toLocaleString('pt-BR'),
+    ...formData,
+    protocolo,
+    to_email: emailDestino,
+    conteudo: buildEmailJsTable(formData),
   };
 
+  showFeedback('Enviando e-mail...');
   try {
-    if (globalThis.location.protocol === 'file:') {
-      throw new Error('BACKEND_LOCAL_INDISPONIVEL');
+    if (!globalThis.emailjs) {
+      throw new Error('EmailJS não carregado.');
     }
-
-    const response = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const result = await response.json().catch(() => ({ ok: false }));
-
-    if (!response.ok || !result.ok) {
-      throw new Error(result.message || 'Falha ao enviar e-mail pelo backend.');
-    }
-
-    showFeedback('E-mail enviado automaticamente com sucesso pelo backend.');
+    await sendEmailJs(payload);
+    showFeedback('E-mail enviado com sucesso via EmailJS!');
   } catch (error) {
     console.error(error);
-    const subject = encodeURIComponent('Nova ficha de captação - Meular Imóveis');
-    const body = encodeURIComponent(formatFormData(payload));
-    globalThis.location.href = `mailto:${emailDestino}?subject=${subject}&body=${body}`;
-    showFeedback('O backend de e-mail ainda não está acessível neste ambiente. O e-mail foi aberto como alternativa.', true);
+    showFeedback('Falha ao enviar e-mail via EmailJS. Verifique a configuração.', true);
   }
 });
 
