@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administração - Meular Imóveis</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .admin-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .admin-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 520px;
+      padding: 40px;
+    }
+
+    .admin-card h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      color: var(--text);
+    }
+
+    .admin-card p.subtitle {
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .admin-logo img {
+      height: 40px;
+    }
+
+    .admin-logo span {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .field input {
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      color: var(--text);
+      background: #fdfaf5;
+      transition: border 0.2s;
+      width: 100%;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .field small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    #loginPanel, #adminPanel { display: block; }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #241b14;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover { border-color: var(--primary); color: var(--text); }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .alert.error { background: #fdecea; color: #b91c1c; border: 1px solid #fca5a5; }
+    .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+
+    .divider {
+      border: none;
+      border-top: 1.5px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .badge-link {
+      display: inline-block;
+      background: #fdfaf5;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--primary-dark);
+      text-decoration: none;
+      margin-top: 8px;
+      word-break: break-all;
+    }
+
+    .badge-link:hover { border-color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="admin-wrapper">
+
+    <!-- TELA DE LOGIN -->
+    <div class="admin-card" id="loginPanel">
+      <div class="admin-logo">
+        <img src="assets/img/logo.png" alt="Meular Imóveis" />
+        <span>Administração</span>
+      </div>
+      <h1>Acesso restrito</h1>
+      <p class="subtitle">Digite a senha de administrador para continuar.</p>
+
+      <div class="alert error" id="loginError">Senha incorreta. Tente novamente.</div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="adminPassword">Senha</label>
+          <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn-primary">Entrar</button>
+      </form>
+    </div>
+
+    <!-- PAINEL ADMIN -->
+    <div class="admin-card" id="adminPanel" style="display:none; max-width: 600px;">
+      <div class="admin-logo">
+        <img src="assets/img/logo.png" alt="Meular Imóveis" />
+        <span>Administração</span>
+      </div>
+      <h1>Canais de recebimento</h1>
+      <p class="subtitle">As alterações são salvas automaticamente e aplicadas imediatamente no formulário.</p>
+
+      <div class="alert success" id="saveAlert">Configurações salvas com sucesso!</div>
+      <div class="alert error" id="errorAlert">Preencha todos os campos corretamente.</div>
+
+      <div class="section-title">Configurações de destino</div>
+
+      <form id="adminForm">
+        <div class="field">
+          <label for="cfgEmail">E-mail de destino</label>
+          <input type="email" id="cfgEmail" placeholder="comercial@meular.com.br" required />
+          <small>Todas as fichas enviadas chegam neste e-mail.</small>
+        </div>
+
+        <div class="field">
+          <label for="cfgWhatsapp">WhatsApp de destino</label>
+          <input type="tel" id="cfgWhatsapp" placeholder="5589994111573" required />
+          <small>Somente números, com DDI e DDD. Ex: 5589994111573</small>
+        </div>
+
+        <div class="field">
+          <label for="cfgWebhook">URL do Google Sheets (webhook)</label>
+          <input type="url" id="cfgWebhook" placeholder="https://script.google.com/macros/s/..." required />
+          <small>URL gerada ao publicar o Apps Script da planilha.</small>
+        </div>
+
+        <button type="submit" class="btn-primary">Salvar configurações</button>
+      </form>
+
+      <hr class="divider" />
+
+      <div class="section-title">Link do formulário</div>
+      <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">Compartilhe este link com corretores e clientes:</p>
+      <a class="badge-link" id="formLink" href="/" target="_blank"></a>
+
+      <button class="btn-secondary" id="logoutBtn" style="margin-top:24px;">Sair da administração</button>
+    </div>
+
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = 'meular2026';
+
+    const DEFAULTS = {
+      email: 'bartworld14@gmail.com',
+      whatsapp: '558994111573',
+      webhook: 'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec',
+    };
+
+    function getConfig() {
+      try {
+        return JSON.parse(localStorage.getItem('meularConfig')) || DEFAULTS;
+      } catch {
+        return DEFAULTS;
+      }
+    }
+
+    function saveConfig(cfg) {
+      localStorage.setItem('meularConfig', JSON.stringify(cfg));
+    }
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const pass = document.getElementById('adminPassword').value;
+      if (pass === ADMIN_PASSWORD) {
+        document.getElementById('loginPanel').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        loadConfig();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    });
+
+    function loadConfig() {
+      const cfg = getConfig();
+      document.getElementById('cfgEmail').value = cfg.email || DEFAULTS.email;
+      document.getElementById('cfgWhatsapp').value = cfg.whatsapp || DEFAULTS.whatsapp;
+      document.getElementById('cfgWebhook').value = cfg.webhook || DEFAULTS.webhook;
+
+      const link = globalThis.location.origin + '/';
+      document.getElementById('formLink').textContent = link;
+      document.getElementById('formLink').href = link;
+    }
+
+    // Salvar
+    document.getElementById('adminForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const cfg = {
+        email: document.getElementById('cfgEmail').value.trim(),
+        whatsapp: document.getElementById('cfgWhatsapp').value.replace(/\D/g, ''),
+        webhook: document.getElementById('cfgWebhook').value.trim(),
+      };
+
+      if (!cfg.email || !cfg.whatsapp || !cfg.webhook) {
+        document.getElementById('errorAlert').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('errorAlert').style.display = 'none';
+      saveConfig(cfg);
+
+      const ok = document.getElementById('saveAlert');
+      ok.style.display = 'block';
+      setTimeout(() => { ok.style.display = 'none'; }, 3000);
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('loginPanel').style.display = 'block';
+      document.getElementById('adminPassword').value = '';
+    });
+  </script>
+</body>
+</html>

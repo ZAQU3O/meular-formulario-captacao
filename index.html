@@ -179,12 +179,17 @@
     </form>
 
     <div id="successMessage" class="success success-panel hidden">
-      <div class="success-header">
-        <strong>Atendimento registrado</strong>
-        <span class="success-badge">Pronto para envio</span>
-      </div>
-      <p id="successText" class="success-text">Formulário pronto. Use os botões acima para salvar, enviar ou registrar os dados.</p>
-      <div class="success-meta">
+      <p id="successText" class="success-text"></p>
+    </div>
+  </div>
+
+  <!-- Modal de confirmação de envio -->
+  <div id="confirmModal" class="confirm-modal hidden">
+    <div class="confirm-box">
+      <div class="confirm-icon">✓</div>
+      <h2>Ficha enviada!</h2>
+      <p>Seus dados foram recebidos com sucesso. Nossa equipe entrará em contato em breve.</p>
+      <div class="confirm-meta">
         <div>
           <small>Protocolo</small>
           <strong id="protocolValue">AGUARDANDO</strong>
@@ -194,6 +199,7 @@
           <strong id="timestampValue">--:--</strong>
         </div>
       </div>
+      <button class="confirm-close" id="closeModal">Fechar</button>
     </div>
   </div>
 

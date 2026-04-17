@@ -3,14 +3,34 @@ const successMessage = document.getElementById('successMessage');
 const successText = document.getElementById('successText');
 const protocolValue = document.getElementById('protocolValue');
 const timestampValue = document.getElementById('timestampValue');
+const confirmModal = document.getElementById('confirmModal');
 const fillTestDataButton = document.getElementById('fillTestData');
 const sendWhatsAppButton = document.getElementById('sendWhatsApp');
 const savePdfButton = document.getElementById('savePdf');
 
-// ─── Configurações da empresa (não visíveis ao usuário) ───────────────────────
-const EMAIL_DESTINO = 'bartworld14@gmail.com';
-const WEBHOOK_PLANILHA = 'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec';
-const WHATSAPP_DESTINO = '558994111573';
+// Fechar modal
+document.getElementById('closeModal').addEventListener('click', () => {
+  confirmModal.classList.add('hidden');
+});
+
+// ─── Configurações da empresa (editáveis pelo admin) ─────────────────────────
+const CONFIG_DEFAULTS = {
+  email: 'bartworld14@gmail.com',
+  whatsapp: '558994111573',
+  webhook: 'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec',
+};
+
+function getConfig() {
+  try {
+    return Object.assign({}, CONFIG_DEFAULTS, JSON.parse(localStorage.getItem('meularConfig') || '{}'));
+  } catch {
+    return CONFIG_DEFAULTS;
+  }
+}
+
+const EMAIL_DESTINO    = () => getConfig().email;
+const WEBHOOK_PLANILHA = () => getConfig().webhook;
+const WHATSAPP_DESTINO = () => getConfig().whatsapp;
 
 // ─── EmailJS config ───────────────────────────────────────────────────────────
 const EMAILJS_SERVICE_ID = 'service_935b0pu';
@@ -251,7 +271,7 @@ form.addEventListener('submit', async function (event) {
     const payload = {
       ...formData,
       protocolo,
-      to_email: EMAIL_DESTINO,
+      to_email: EMAIL_DESTINO(),
       conteudo: buildEmailJsTable(formData),
     };
     await sendEmailJs(payload);
@@ -262,7 +282,7 @@ form.addEventListener('submit', async function (event) {
 
   // 2. Enviar para Google Sheets
   try {
-    await fetch(WEBHOOK_PLANILHA, {
+    await fetch(WEBHOOK_PLANILHA(), {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -276,21 +296,25 @@ form.addEventListener('submit', async function (event) {
   submitBtn.disabled = false;
   submitBtn.textContent = 'Enviar Ficha';
 
-  if (emailOk && sheetsOk) {
-    showFeedback('Ficha enviada com sucesso! E-mail e planilha atualizados.');
-  } else if (emailOk) {
-    showFeedback('E-mail enviado, mas houve falha ao registrar na planilha.', true);
-  } else if (sheetsOk) {
-    showFeedback('Planilha atualizada, mas houve falha no envio do e-mail.', true);
-  } else {
+  if (emailOk || sheetsOk) {
+    // Abre modal de confirmação
+    updateProtocolInfo();
+    confirmModal.classList.remove('hidden');
+  }
+
+  if (!emailOk && !sheetsOk) {
     showFeedback('Falha ao enviar. Verifique sua conexão e tente novamente.', true);
+  } else if (!emailOk) {
+    showFeedback('Planilha atualizada, mas houve falha no envio do e-mail.', true);
+  } else if (!sheetsOk) {
+    showFeedback('E-mail enviado, mas houve falha ao registrar na planilha.', true);
   }
 });
 
 // ─── Botões opcionais ─────────────────────────────────────────────────────────
 sendWhatsAppButton.addEventListener('click', () => {
   const texto = encodeURIComponent(`Nova ficha de captação\n\n${formatFormData(collectFormData())}`);
-  globalThis.open(`https://wa.me/${WHATSAPP_DESTINO}?text=${texto}`, '_blank');
+  globalThis.open(`https://wa.me/${WHATSAPP_DESTINO()}?text=${texto}`, '_blank');
   showFeedback('WhatsApp aberto com a mensagem preenchida.');
 });
 
