@@ -3,15 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Administração - Meular Imóveis</title>
+  <title>Administração</title>
   <link rel="stylesheet" href="assets/css/style.css" />
+  <!-- EmailJS para testar envio de e-mail direto do painel -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>(function(){ emailjs.init('Tp3KkqmXfULnu2dl2'); })();</script>
   <style>
+    /* ── Layout ─────────────────────────────────────── */
     .admin-wrapper {
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 24px;
+      padding: 32px 16px;
+      background: var(--bg, #faf7f2);
     }
 
     .admin-card {
@@ -19,8 +24,28 @@
       border-radius: 16px;
       box-shadow: var(--shadow);
       width: 100%;
-      max-width: 520px;
+      max-width: 680px;
       padding: 40px;
+    }
+
+    /* ── Cabeçalho ──────────────────────────────────── */
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .admin-logo img {
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .admin-logo span {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .admin-card h1 {
@@ -35,24 +60,7 @@
       font-size: 14px;
     }
 
-    .admin-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .admin-logo img {
-      height: 40px;
-    }
-
-    .admin-logo span {
-      font-size: 13px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
+    /* ── Campo genérico ─────────────────────────────── */
     .field {
       display: flex;
       flex-direction: column;
@@ -66,7 +74,9 @@
       color: var(--text);
     }
 
-    .field input {
+    .field input,
+    .field textarea,
+    .field select {
       padding: 10px 14px;
       border: 1.5px solid var(--border);
       border-radius: 8px;
@@ -75,9 +85,16 @@
       background: #fdfaf5;
       transition: border 0.2s;
       width: 100%;
+      font-family: inherit;
     }
 
-    .field input:focus {
+    .field textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
       outline: none;
       border-color: var(--primary);
     }
@@ -87,8 +104,7 @@
       font-size: 12px;
     }
 
-    #loginPanel, #adminPanel { display: block; }
-
+    /* ── Botões ─────────────────────────────────────── */
     .btn-primary {
       background: var(--primary);
       color: #241b14;
@@ -102,8 +118,8 @@
       margin-top: 4px;
       transition: background 0.2s;
     }
-
     .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .btn-secondary {
       background: transparent;
@@ -117,9 +133,16 @@
       margin-top: 8px;
       transition: all 0.2s;
     }
-
     .btn-secondary:hover { border-color: var(--primary); color: var(--text); }
 
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .btn-row .btn-secondary { margin-top: 0; }
+
+    /* ── Alertas ─────────────────────────────────────── */
     .alert {
       padding: 12px 16px;
       border-radius: 8px;
@@ -127,14 +150,15 @@
       margin-bottom: 18px;
       display: none;
     }
-
-    .alert.error { background: #fdecea; color: #b91c1c; border: 1px solid #fca5a5; }
+    .alert.error   { background: #fdecea; color: #b91c1c; border: 1px solid #fca5a5; }
     .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+    .alert.info    { background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; }
 
+    /* ── Separadores e títulos de seção ─────────────── */
     .divider {
       border: none;
       border-top: 1.5px solid var(--border);
-      margin: 24px 0;
+      margin: 28px 0;
     }
 
     .section-title {
@@ -143,10 +167,27 @@
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 16px;
+      margin-bottom: 4px;
+    }
+
+    .section-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 18px;
+    }
+
+    /* ── Link do formulário ─────────────────────────── */
+    .link-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
     }
 
     .badge-link {
+      flex: 1;
+      min-width: 0;
       display: inline-block;
       background: #fdfaf5;
       border: 1.5px solid var(--border);
@@ -155,20 +196,117 @@
       font-size: 13px;
       color: var(--primary-dark);
       text-decoration: none;
-      margin-top: 8px;
       word-break: break-all;
     }
-
     .badge-link:hover { border-color: var(--primary); }
+
+    .btn-copy {
+      white-space: nowrap;
+      background: var(--primary);
+      color: #241b14;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-copy:hover { background: var(--primary-dark); }
+
+    /* ── Preview do logo ──────────────────────────────── */
+    .logo-preview-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 10px;
+      padding: 12px 16px;
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      background: #fdfaf5;
+    }
+
+    .logo-preview-wrap img {
+      max-height: 56px;
+      max-width: 160px;
+      object-fit: contain;
+    }
+
+    .logo-preview-wrap span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── Info do sistema ─────────────────────────────── */
+    .sys-info {
+      background: #fdfaf5;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .sys-info strong { color: var(--text); }
+
+    /* ── Timeout bar ─────────────────────────────────── */
+    .timeout-bar-wrap {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .timeout-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .timeout-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 2px;
+      transition: width 1s linear;
+      width: 100%;
+    }
+
+    /* ── Config status badge ─────────────────────────── */
+    .config-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 10px;
+    }
+    .config-badge.custom  { background: #ecfdf5; color: #065f46; }
+    .config-badge.default { background: #fef3c7; color: #92400e; }
+
+    /* ── Grid 2 colunas ───────────────────────────────── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 18px;
+    }
+    @media (max-width: 540px) { .grid-2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <div class="admin-wrapper">
 
-    <!-- TELA DE LOGIN -->
-    <div class="admin-card" id="loginPanel">
+    <!-- ═══════════════════════════════════════
+         TELA DE LOGIN
+    ═══════════════════════════════════════ -->
+    <div class="admin-card" id="loginPanel" style="max-width:440px;">
       <div class="admin-logo">
-        <img src="assets/img/logo.png" alt="Meular Imóveis" />
+        <img id="loginLogo" src="assets/img/logo.png" alt="Logo" />
         <span>Administração</span>
       </div>
       <h1>Acesso restrito</h1>
@@ -185,126 +323,528 @@
       </form>
     </div>
 
-    <!-- PAINEL ADMIN -->
-    <div class="admin-card" id="adminPanel" style="display:none; max-width: 600px;">
+    <!-- ═══════════════════════════════════════
+         PAINEL ADMIN
+    ═══════════════════════════════════════ -->
+    <div class="admin-card" id="adminPanel" style="display:none;">
+
       <div class="admin-logo">
-        <img src="assets/img/logo.png" alt="Meular Imóveis" />
+        <img id="adminLogoImg" src="assets/img/logo.png" alt="Logo" />
         <span>Administração</span>
       </div>
-      <h1>Canais de recebimento</h1>
-      <p class="subtitle">As alterações são salvas automaticamente e aplicadas imediatamente no formulário.</p>
+      <h1>Painel Administrativo</h1>
+      <p class="subtitle">Todas as alterações são aplicadas imediatamente no formulário.</p>
 
-      <div class="alert success" id="saveAlert">Configurações salvas com sucesso!</div>
-      <div class="alert error" id="errorAlert">Preencha todos os campos corretamente.</div>
+      <!-- Alertas globais -->
+      <div class="alert success" id="saveAlert"></div>
+      <div class="alert error"   id="errorAlert"></div>
+      <div class="alert info"    id="infoAlert"></div>
 
-      <div class="section-title">Configurações de destino</div>
+      <!-- ────────────────────────────────────────
+           1. CANAIS DE RECEBIMENTO
+      ──────────────────────────────────────── -->
+      <div class="section-title">
+        Canais de recebimento
+        <span class="config-badge" id="badgeCanais">padrão</span>
+      </div>
+      <p class="section-desc">Para onde as fichas de captação devem ser enviadas.</p>
 
       <form id="adminForm">
         <div class="field">
           <label for="cfgEmail">E-mail de destino</label>
-          <input type="email" id="cfgEmail" placeholder="comercial@meular.com.br" required />
-          <small>Todas as fichas enviadas chegam neste e-mail.</small>
+          <input type="email" id="cfgEmail" placeholder="comercial@imobiliaria.com.br" required />
+          <small>Todas as fichas chegam neste e-mail via EmailJS.</small>
         </div>
-
         <div class="field">
           <label for="cfgWhatsapp">WhatsApp de destino</label>
           <input type="tel" id="cfgWhatsapp" placeholder="5589994111573" required />
           <small>Somente números, com DDI e DDD. Ex: 5589994111573</small>
         </div>
-
         <div class="field">
           <label for="cfgWebhook">URL do Google Sheets (webhook)</label>
           <input type="url" id="cfgWebhook" placeholder="https://script.google.com/macros/s/..." required />
           <small>URL gerada ao publicar o Apps Script da planilha.</small>
         </div>
-
-        <button type="submit" class="btn-primary">Salvar configurações</button>
+        <button type="submit" class="btn-primary">Salvar canais</button>
+        <div class="btn-row">
+          <button type="button" class="btn-secondary" id="btnTestarEmail">Testar e-mail</button>
+          <button type="button" class="btn-secondary" id="btnTestarWebhook">Testar webhook</button>
+        </div>
       </form>
 
       <hr class="divider" />
 
+      <!-- ────────────────────────────────────────
+           2. IDENTIDADE VISUAL
+      ──────────────────────────────────────── -->
+      <div class="section-title">
+        Identidade visual
+        <span class="config-badge" id="badgeIdentidade">padrão</span>
+      </div>
+      <p class="section-desc">Logotipo e nome exibidos no formulário e nos e-mails.</p>
+
+      <form id="formIdentidade">
+        <div class="field">
+          <label for="cfgNomeImobiliaria">Nome da imobiliária</label>
+          <input type="text" id="cfgNomeImobiliaria" placeholder="Meular Imóveis" />
+          <small>Aparece no cabeçalho do formulário e nos e-mails enviados.</small>
+        </div>
+
+        <div class="field">
+          <label>Logo atual</label>
+          <div class="logo-preview-wrap">
+            <img id="logoPreview" src="assets/img/logo.png" alt="Preview do logo" />
+            <span id="logoPreviewLabel">Logo padrão</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cfgLogoFile">Enviar novo logo (PNG, JPG, SVG — máx. 500 KB)</label>
+          <input type="file" id="cfgLogoFile" accept="image/png,image/jpeg,image/svg+xml,image/webp" />
+          <small>O logo é armazenado localmente no navegador deste dispositivo.</small>
+        </div>
+
+        <button type="submit" class="btn-primary">Salvar identidade</button>
+        <button type="button" class="btn-secondary" id="btnResetLogo">Restaurar logo padrão</button>
+      </form>
+
+      <hr class="divider" />
+
+      <!-- ────────────────────────────────────────
+           3. TEXTOS DO FORMULÁRIO
+      ──────────────────────────────────────── -->
+      <div class="section-title">
+        Textos do formulário
+        <span class="config-badge" id="badgeTextos">padrão</span>
+      </div>
+      <p class="section-desc">Personalize os textos exibidos no cabeçalho do formulário.</p>
+
+      <form id="formTextos">
+        <div class="grid-2">
+          <div class="field">
+            <label for="cfgEyebrow">Tag acima do título</label>
+            <input type="text" id="cfgEyebrow" placeholder="CAPTAÇÃO ONLINE" />
+            <small>Texto em destaque (maiúsculas).</small>
+          </div>
+          <div class="field">
+            <label for="cfgTitulo">Título principal (h1)</label>
+            <input type="text" id="cfgTitulo" placeholder="Ficha de Captação" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="cfgSubtitulo">Subtítulo</label>
+          <textarea id="cfgSubtitulo" rows="3" placeholder="Formulário profissional..."></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="cfgBrandNome">Nome no card da marca</label>
+            <input type="text" id="cfgBrandNome" placeholder="meular imóveis" />
+          </div>
+          <div class="field">
+            <label for="cfgBrandDesc">Slogan / descrição do card</label>
+            <input type="text" id="cfgBrandDesc" placeholder="Atendimento imobiliário..." />
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Salvar textos</button>
+      </form>
+
+      <hr class="divider" />
+
+      <!-- ────────────────────────────────────────
+           4. SEGURANÇA
+      ──────────────────────────────────────── -->
+      <div class="section-title">Segurança</div>
+      <p class="section-desc">Altere a senha de acesso ao painel administrativo.</p>
+
+      <form id="formSenha">
+        <div class="field">
+          <label for="cfgSenhaAtual">Senha atual</label>
+          <input type="password" id="cfgSenhaAtual" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="cfgNovaSenha">Nova senha</label>
+            <input type="password" id="cfgNovaSenha" placeholder="mínimo 6 caracteres" minlength="6" autocomplete="new-password" required />
+          </div>
+          <div class="field">
+            <label for="cfgConfirmarSenha">Confirmar nova senha</label>
+            <input type="password" id="cfgConfirmarSenha" placeholder="repita a nova senha" autocomplete="new-password" required />
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Alterar senha</button>
+      </form>
+
+      <hr class="divider" />
+
+      <!-- ────────────────────────────────────────
+           5. LINK DO FORMULÁRIO
+      ──────────────────────────────────────── -->
       <div class="section-title">Link do formulário</div>
-      <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">Compartilhe este link com corretores e clientes:</p>
-      <a class="badge-link" id="formLink" href="/" target="_blank"></a>
+      <p class="section-desc">Compartilhe com corretores, proprietários e clientes.</p>
+      <div class="link-row">
+        <a class="badge-link" id="formLink" href="/" target="_blank"></a>
+        <button type="button" class="btn-copy" id="btnCopiarLink">Copiar</button>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ────────────────────────────────────────
+           6. INFORMAÇÕES DO SISTEMA
+      ──────────────────────────────────────── -->
+      <div class="section-title">Informações do sistema</div>
+      <div class="sys-info">
+        <div>Última alteração salva: <strong id="sysUltimaSalva">—</strong></div>
+        <div>Config. armazenada: <strong id="sysStatus">—</strong></div>
+        <div>Versão: <strong>2.0.0</strong></div>
+      </div>
+
+      <!-- Barra de timeout de sessão -->
+      <div class="timeout-bar-wrap">
+        Sessão expira automaticamente em <strong id="timeoutLabel">30:00</strong> min de inatividade.
+        <div class="timeout-bar"><div class="timeout-fill" id="timeoutFill"></div></div>
+      </div>
 
       <button class="btn-secondary" id="logoutBtn" style="margin-top:24px;">Sair da administração</button>
-    </div>
+    </div><!-- /#adminPanel -->
 
-  </div>
+  </div><!-- /.admin-wrapper -->
 
   <script>
-    const ADMIN_PASSWORD = 'meular2026';
+  (function () {
+    // ─── Constantes ────────────────────────────────────────────────────────────
+    const EMAILJS_SERVICE_ID  = 'service_935b0pu';
+    const EMAILJS_TEMPLATE_ID = 'template_74ix2rt';
+    const EMAILJS_PUBLIC_KEY  = 'Tp3KkqmXfULnu2dl2';
+    const SESSION_TIMEOUT_MS  = 30 * 60 * 1000; // 30 minutos
 
     const DEFAULTS = {
-      email: 'bartworld14@gmail.com',
-      whatsapp: '558994111573',
-      webhook: 'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec',
+      email:            'bartworld14@gmail.com',
+      whatsapp:         '558994111573',
+      webhook:          'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec',
+      nomeImobiliaria:  'Meular Imóveis',
+      logoUrl:          '',
+      formEyebrow:      'CAPTAÇÃO ONLINE',
+      formTitulo:       'Ficha de Captação',
+      formSubtitulo:    'Formulário profissional personalizado para a Meular Imóveis registrar proprietários, imóveis e condições comerciais.',
+      formBrandNome:    'meular imóveis',
+      formBrandDesc:    'Atendimento imobiliário com apresentação elegante e prática.',
+      adminPassword:    'meular2026',
+      ultimaSalva:      '',
     };
 
+    // ─── Config helpers ─────────────────────────────────────────────────────────
     function getConfig() {
       try {
-        return JSON.parse(localStorage.getItem('meularConfig')) || DEFAULTS;
-      } catch {
-        return DEFAULTS;
-      }
+        return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem('meularConfig') || '{}'));
+      } catch { return { ...DEFAULTS }; }
     }
 
-    function saveConfig(cfg) {
-      localStorage.setItem('meularConfig', JSON.stringify(cfg));
+    function saveConfig(partial) {
+      const current = getConfig();
+      const next = Object.assign(current, partial, { ultimaSalva: new Date().toLocaleString('pt-BR') });
+      localStorage.setItem('meularConfig', JSON.stringify(next));
+      refreshSysInfo();
     }
 
-    // Login
+    // ─── Alertas ────────────────────────────────────────────────────────────────
+    let alertTimer;
+    function showAlert(type, msg, duration = 4000) {
+      clearTimeout(alertTimer);
+      ['saveAlert', 'errorAlert', 'infoAlert'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      const map = { success: 'saveAlert', error: 'errorAlert', info: 'infoAlert' };
+      const el = document.getElementById(map[type]);
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (duration > 0) alertTimer = setTimeout(() => { el.style.display = 'none'; }, duration);
+    }
+
+    // ─── Badges de configuração personalizada ───────────────────────────────────
+    function updateBadge(badgeId, isCustom) {
+      const el = document.getElementById(badgeId);
+      if (!el) return;
+      el.textContent = isCustom ? 'personalizado' : 'padrão';
+      el.className = 'config-badge ' + (isCustom ? 'custom' : 'default');
+    }
+
+    function refreshBadges(cfg) {
+      const canaisCustom = cfg.email !== DEFAULTS.email || cfg.whatsapp !== DEFAULTS.whatsapp || cfg.webhook !== DEFAULTS.webhook;
+      const identCustom  = cfg.nomeImobiliaria !== DEFAULTS.nomeImobiliaria || !!cfg.logoUrl;
+      const textosCustom = cfg.formTitulo !== DEFAULTS.formTitulo || cfg.formSubtitulo !== DEFAULTS.formSubtitulo ||
+                           cfg.formEyebrow !== DEFAULTS.formEyebrow || cfg.formBrandNome !== DEFAULTS.formBrandNome ||
+                           cfg.formBrandDesc !== DEFAULTS.formBrandDesc;
+
+      updateBadge('badgeCanais', canaisCustom);
+      updateBadge('badgeIdentidade', identCustom);
+      updateBadge('badgeTextos', textosCustom);
+    }
+
+    // ─── Sys info ───────────────────────────────────────────────────────────────
+    function refreshSysInfo() {
+      const cfg = getConfig();
+      document.getElementById('sysUltimaSalva').textContent = cfg.ultimaSalva || 'Nunca';
+      const isDefault = JSON.stringify(cfg) === JSON.stringify(DEFAULTS);
+      document.getElementById('sysStatus').textContent = isDefault ? 'Valores padrão' : 'Personalizada';
+      refreshBadges(cfg);
+    }
+
+    // ─── Carrega campos com valores salvos ───────────────────────────────────────
+    function loadConfig() {
+      const cfg = getConfig();
+
+      // Canais
+      document.getElementById('cfgEmail').value    = cfg.email;
+      document.getElementById('cfgWhatsapp').value = cfg.whatsapp;
+      document.getElementById('cfgWebhook').value  = cfg.webhook;
+
+      // Identidade
+      document.getElementById('cfgNomeImobiliaria').value = cfg.nomeImobiliaria;
+      applyLogo(cfg.logoUrl);
+
+      // Textos
+      document.getElementById('cfgEyebrow').value   = cfg.formEyebrow;
+      document.getElementById('cfgTitulo').value    = cfg.formTitulo;
+      document.getElementById('cfgSubtitulo').value = cfg.formSubtitulo;
+      document.getElementById('cfgBrandNome').value = cfg.formBrandNome;
+      document.getElementById('cfgBrandDesc').value = cfg.formBrandDesc;
+
+      // Link
+      const url = globalThis.location.origin + '/';
+      document.getElementById('formLink').textContent = url;
+      document.getElementById('formLink').href = url;
+
+      refreshSysInfo();
+    }
+
+    function applyLogo(url) {
+      const src = url || 'assets/img/logo.png';
+      document.getElementById('logoPreview').src     = src;
+      document.getElementById('adminLogoImg').src    = src;
+      document.getElementById('loginLogo').src       = src;
+      document.getElementById('logoPreviewLabel').textContent = url ? 'Logo personalizado' : 'Logo padrão';
+    }
+
+    // ─── LOGIN ───────────────────────────────────────────────────────────────────
     document.getElementById('loginForm').addEventListener('submit', function (e) {
       e.preventDefault();
       const pass = document.getElementById('adminPassword').value;
-      if (pass === ADMIN_PASSWORD) {
+      const cfg  = getConfig();
+      if (pass === (cfg.adminPassword || DEFAULTS.adminPassword)) {
         document.getElementById('loginPanel').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
         loadConfig();
+        resetSessionTimer();
       } else {
         document.getElementById('loginError').style.display = 'block';
       }
     });
 
-    function loadConfig() {
-      const cfg = getConfig();
-      document.getElementById('cfgEmail').value = cfg.email || DEFAULTS.email;
-      document.getElementById('cfgWhatsapp').value = cfg.whatsapp || DEFAULTS.whatsapp;
-      document.getElementById('cfgWebhook').value = cfg.webhook || DEFAULTS.webhook;
-
-      const link = globalThis.location.origin + '/';
-      document.getElementById('formLink').textContent = link;
-      document.getElementById('formLink').href = link;
-    }
-
-    // Salvar
+    // ─── 1. CANAIS ────────────────────────────────────────────────────────────────
     document.getElementById('adminForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      const cfg = {
-        email: document.getElementById('cfgEmail').value.trim(),
-        whatsapp: document.getElementById('cfgWhatsapp').value.replace(/\D/g, ''),
-        webhook: document.getElementById('cfgWebhook').value.trim(),
-      };
+      const email   = document.getElementById('cfgEmail').value.trim();
+      const wpp     = document.getElementById('cfgWhatsapp').value.replace(/\D/g, '');
+      const webhook = document.getElementById('cfgWebhook').value.trim();
 
-      if (!cfg.email || !cfg.whatsapp || !cfg.webhook) {
-        document.getElementById('errorAlert').style.display = 'block';
+      if (!email || !wpp || !webhook) {
+        showAlert('error', 'Preencha todos os campos de canais corretamente.');
         return;
       }
-
-      document.getElementById('errorAlert').style.display = 'none';
-      saveConfig(cfg);
-
-      const ok = document.getElementById('saveAlert');
-      ok.style.display = 'block';
-      setTimeout(() => { ok.style.display = 'none'; }, 3000);
+      saveConfig({ email, whatsapp: wpp, webhook });
+      showAlert('success', 'Canais de recebimento salvos com sucesso!');
     });
 
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', function () {
-      document.getElementById('adminPanel').style.display = 'none';
-      document.getElementById('loginPanel').style.display = 'block';
-      document.getElementById('adminPassword').value = '';
+    // Testar e-mail
+    document.getElementById('btnTestarEmail').addEventListener('click', async function () {
+      const email = document.getElementById('cfgEmail').value.trim();
+      if (!email) { showAlert('error', 'Preencha o e-mail antes de testar.'); return; }
+
+      this.disabled = true;
+      this.textContent = 'Enviando...';
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          to_email:  email,
+          protocolo: 'TESTE-' + Date.now(),
+          proprietario: 'Teste',
+          conteudo: '<p>Este é um e-mail de teste enviado pelo painel administrativo da <strong>Meular Imóveis</strong>.</p>',
+        }, EMAILJS_PUBLIC_KEY);
+        showAlert('success', `E-mail de teste enviado para ${email}. Verifique a caixa de entrada.`);
+      } catch (err) {
+        showAlert('error', 'Falha ao enviar e-mail. Verifique o EmailJS e as Allowed Origins.');
+        console.error(err);
+      } finally {
+        this.disabled = false;
+        this.textContent = 'Testar e-mail';
+      }
     });
+
+    // Testar webhook
+    document.getElementById('btnTestarWebhook').addEventListener('click', async function () {
+      const webhook = document.getElementById('cfgWebhook').value.trim();
+      if (!webhook) { showAlert('error', 'Preencha a URL do webhook antes de testar.'); return; }
+
+      this.disabled = true;
+      this.textContent = 'Enviando...';
+      try {
+        await fetch(webhook, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ _teste: true, mensagem: 'Teste do painel administrativo', ts: new Date().toISOString() }),
+        });
+        showAlert('info', 'Requisição enviada ao webhook (modo sem CORS). Verifique se uma linha de teste apareceu na planilha.');
+      } catch (err) {
+        showAlert('error', 'Falha ao contactar o webhook. Verifique a URL.');
+        console.error(err);
+      } finally {
+        this.disabled = false;
+        this.textContent = 'Testar webhook';
+      }
+    });
+
+    // ─── 2. IDENTIDADE VISUAL ─────────────────────────────────────────────────────
+    // Preview ao selecionar arquivo
+    document.getElementById('cfgLogoFile').addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+      if (file.size > 512 * 1024) {
+        showAlert('error', 'Arquivo muito grande. Use uma imagem de até 500 KB.');
+        this.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById('logoPreview').src      = ev.target.result;
+        document.getElementById('logoPreviewLabel').textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('formIdentidade').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nome = document.getElementById('cfgNomeImobiliaria').value.trim();
+      const file = document.getElementById('cfgLogoFile').files[0];
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          saveConfig({ nomeImobiliaria: nome || DEFAULTS.nomeImobiliaria, logoUrl: ev.target.result });
+          applyLogo(ev.target.result);
+          showAlert('success', 'Identidade visual salva!');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        saveConfig({ nomeImobiliaria: nome || DEFAULTS.nomeImobiliaria });
+        showAlert('success', 'Nome da imobiliária salvo!');
+      }
+    });
+
+    document.getElementById('btnResetLogo').addEventListener('click', function () {
+      saveConfig({ logoUrl: '' });
+      applyLogo('');
+      document.getElementById('cfgLogoFile').value = '';
+      showAlert('success', 'Logo restaurado para o padrão.');
+    });
+
+    // ─── 3. TEXTOS DO FORMULÁRIO ──────────────────────────────────────────────────
+    document.getElementById('formTextos').addEventListener('submit', function (e) {
+      e.preventDefault();
+      saveConfig({
+        formEyebrow:   document.getElementById('cfgEyebrow').value.trim()   || DEFAULTS.formEyebrow,
+        formTitulo:    document.getElementById('cfgTitulo').value.trim()    || DEFAULTS.formTitulo,
+        formSubtitulo: document.getElementById('cfgSubtitulo').value.trim() || DEFAULTS.formSubtitulo,
+        formBrandNome: document.getElementById('cfgBrandNome').value.trim() || DEFAULTS.formBrandNome,
+        formBrandDesc: document.getElementById('cfgBrandDesc').value.trim() || DEFAULTS.formBrandDesc,
+      });
+      showAlert('success', 'Textos do formulário salvos!');
+    });
+
+    // ─── 4. TROCAR SENHA ─────────────────────────────────────────────────────────
+    document.getElementById('formSenha').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const cfg          = getConfig();
+      const senhaAtual   = document.getElementById('cfgSenhaAtual').value;
+      const novaSenha    = document.getElementById('cfgNovaSenha').value;
+      const confirmar    = document.getElementById('cfgConfirmarSenha').value;
+      const passwordAtual = cfg.adminPassword || DEFAULTS.adminPassword;
+
+      if (senhaAtual !== passwordAtual) {
+        showAlert('error', 'Senha atual incorreta.');
+        return;
+      }
+      if (novaSenha.length < 6) {
+        showAlert('error', 'A nova senha deve ter pelo menos 6 caracteres.');
+        return;
+      }
+      if (novaSenha !== confirmar) {
+        showAlert('error', 'As senhas não coincidem.');
+        return;
+      }
+      saveConfig({ adminPassword: novaSenha });
+      document.getElementById('cfgSenhaAtual').value   = '';
+      document.getElementById('cfgNovaSenha').value    = '';
+      document.getElementById('cfgConfirmarSenha').value = '';
+      showAlert('success', 'Senha alterada com sucesso!');
+    });
+
+    // ─── 5. LINK: COPIAR ─────────────────────────────────────────────────────────
+    document.getElementById('btnCopiarLink').addEventListener('click', function () {
+      const url = document.getElementById('formLink').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        this.textContent = 'Copiado!';
+        setTimeout(() => { this.textContent = 'Copiar'; }, 2000);
+      }).catch(() => {
+        showAlert('info', 'Selecione o link manualmente e use Ctrl+C para copiar.');
+      });
+    });
+
+    // ─── LOGOUT ───────────────────────────────────────────────────────────────────
+    document.getElementById('logoutBtn').addEventListener('click', doLogout);
+
+    function doLogout() {
+      clearInterval(sessionInterval);
+      document.getElementById('adminPanel').style.display  = 'none';
+      document.getElementById('loginPanel').style.display  = 'block';
+      document.getElementById('adminPassword').value       = '';
+      document.getElementById('loginError').style.display  = 'none';
+    }
+
+    // ─── TIMEOUT DE SESSÃO (30 min) ───────────────────────────────────────────────
+    let sessionDeadline;
+    let sessionInterval;
+    const TOTAL_SECS = SESSION_TIMEOUT_MS / 1000;
+
+    function resetSessionTimer() {
+      sessionDeadline = Date.now() + SESSION_TIMEOUT_MS;
+    }
+
+    function tickSession() {
+      const remaining = Math.max(0, sessionDeadline - Date.now());
+      const secs      = Math.ceil(remaining / 1000);
+      const min       = String(Math.floor(secs / 60)).padStart(2, '0');
+      const sec       = String(secs % 60).padStart(2, '0');
+      const fill      = document.getElementById('timeoutFill');
+      const label     = document.getElementById('timeoutLabel');
+      if (fill)  fill.style.width  = (remaining / SESSION_TIMEOUT_MS * 100) + '%';
+      if (label) label.textContent = `${min}:${sec}`;
+      if (remaining === 0) { doLogout(); }
+    }
+
+    // Reinicia o timer em qualquer interação
+    ['mousemove', 'keydown', 'click', 'touchstart'].forEach(ev => {
+      document.addEventListener(ev, () => {
+        if (document.getElementById('adminPanel').style.display !== 'none') {
+          resetSessionTimer();
+        }
+      });
+    });
+
+    sessionInterval = setInterval(tickSession, 1000);
+
+  })();
   </script>
 </body>
 </html>

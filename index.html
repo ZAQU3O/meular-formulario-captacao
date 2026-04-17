@@ -210,6 +210,24 @@
       emailjs.init('Tp3KkqmXfULnu2dl2');
     })();
   </script>
+  <!-- Aplica configurações visuais antes de renderizar -->
+  <script>
+    (function () {
+      try {
+        var cfg = JSON.parse(localStorage.getItem('meularConfig') || '{}');
+        document.addEventListener('DOMContentLoaded', function () {
+          if (cfg.logoUrl) {
+            document.querySelectorAll('.brand-image').forEach(function(el){ el.src = cfg.logoUrl; });
+          }
+          if (cfg.formEyebrow)   { var e = document.querySelector('.eyebrow');   if(e) e.textContent = cfg.formEyebrow; }
+          if (cfg.formTitulo)    { var t = document.querySelector('.hero-copy h1'); if(t) t.textContent = cfg.formTitulo; }
+          if (cfg.formSubtitulo) { var s = document.querySelector('.hero-copy .subtitle'); if(s) s.textContent = cfg.formSubtitulo; }
+          if (cfg.formBrandNome) { var bn = document.querySelector('.brand-card strong'); if(bn) bn.textContent = cfg.formBrandNome; }
+          if (cfg.formBrandDesc) { var bd = document.querySelector('.brand-card span');   if(bd) bd.textContent = cfg.formBrandDesc; }
+        });
+      } catch(e) {}
+    })();
+  </script>
   <script src="assets/js/script.js"></script>
 </body>
 </html>

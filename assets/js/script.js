@@ -15,9 +15,17 @@ document.getElementById('closeModal').addEventListener('click', () => {
 
 // ─── Configurações da empresa (editáveis pelo admin) ─────────────────────────
 const CONFIG_DEFAULTS = {
-  email: 'bartworld14@gmail.com',
-  whatsapp: '558994111573',
-  webhook: 'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec',
+  email:           'bartworld14@gmail.com',
+  whatsapp:        '558994111573',
+  webhook:         'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec',
+  nomeImobiliaria: 'Meular Imóveis',
+  logoUrl:         '',
+  formEyebrow:     'CAPTAÇÃO ONLINE',
+  formTitulo:      'Ficha de Captação',
+  formSubtitulo:   'Formulário profissional personalizado para a Meular Imóveis registrar proprietários, imóveis e condições comerciais.',
+  formBrandNome:   'meular imóveis',
+  formBrandDesc:   'Atendimento imobiliário com apresentação elegante e prática.',
+  adminPassword:   'meular2026',
 };
 
 function getConfig() {
@@ -284,9 +292,10 @@ form.addEventListener('submit', async function (event) {
   if (formData.email) {
     try {
       const nomeProprietario = formData.proprietario || 'Proprietário';
+      const nomeImob = getConfig().nomeImobiliaria || CONFIG_DEFAULTS.nomeImobiliaria;
       const confirmacaoHtml = `
         <p>Olá, <strong>${nomeProprietario}</strong>!</p>
-        <p>Sua ficha de captação foi recebida com sucesso pela <strong>Meular Imóveis</strong>.</p>
+        <p>Sua ficha de captação foi recebida com sucesso pela <strong>${nomeImob}</strong>.</p>
         <p>Em breve entraremos em contato.</p>
         <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
         <p style="font-size:12px;color:#888;">Protocolo: <strong>${protocolo}</strong></p>
