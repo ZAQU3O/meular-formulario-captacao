@@ -123,9 +123,11 @@ function setupSignaturePad(canvasId, inputId) {
   function getPosition(event) {
     const rect = canvas.getBoundingClientRect();
     const source = event.touches ? event.touches[0] : event;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     return {
-      x: source.clientX - rect.left,
-      y: source.clientY - rect.top,
+      x: (source.clientX - rect.left) * scaleX,
+      y: (source.clientY - rect.top) * scaleY,
     };
   }
 
