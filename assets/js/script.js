@@ -8,9 +8,9 @@ const fillTestDataButton = document.getElementById('fillTestData');
 const sendWhatsAppButton = document.getElementById('sendWhatsApp');
 const savePdfButton = document.getElementById('savePdf');
 
-// Fechar modal
+// Fechar modal — recarrega a página para limpar o formulário
 document.getElementById('closeModal').addEventListener('click', () => {
-  confirmModal.classList.add('hidden');
+  window.location.reload();
 });
 
 // ─── Configurações da empresa (editáveis pelo admin) ─────────────────────────
@@ -264,7 +264,7 @@ form.addEventListener('submit', async function (event) {
   let emailOk = false;
   let sheetsOk = false;
 
-  // 1. Enviar e-mail via EmailJS
+  // 1. Enviar e-mail para a imobiliária via EmailJS
   try {
     const payload = {
       ...formData,
@@ -276,6 +276,28 @@ form.addEventListener('submit', async function (event) {
     emailOk = true;
   } catch (err) {
     console.error('Erro EmailJS:', err);
+  }
+
+  // 1b. Enviar e-mail de confirmação ao proprietário (se informou e-mail)
+  if (formData.email) {
+    try {
+      const nomeProprietario = formData.proprietario || 'Proprietário';
+      const confirmacaoHtml = `
+        <p>Olá, <strong>${nomeProprietario}</strong>!</p>
+        <p>Sua ficha de captação foi recebida com sucesso pela <strong>Meular Imóveis</strong>.</p>
+        <p>Em breve entraremos em contato.</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+        <p style="font-size:12px;color:#888;">Protocolo: <strong>${protocolo}</strong></p>
+      `;
+      await sendEmailJs({
+        protocolo,
+        proprietario: nomeProprietario,
+        to_email: formData.email,
+        conteudo: confirmacaoHtml,
+      });
+    } catch (err) {
+      console.error('Erro e-mail proprietário:', err);
+    }
   }
 
   // 2. Enviar para Google Sheets
