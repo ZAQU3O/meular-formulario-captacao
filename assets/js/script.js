@@ -52,8 +52,6 @@ function buildEmailJsTable(data) {
 function sendEmailJs(payload) {
   return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, payload, EMAILJS_PUBLIC_KEY);
 }
-const savePdfButton = document.getElementById('savePdf');
-const saveSheetsButton = document.getElementById('saveSheets');
 
 const labelMap = {
   corretor: 'Nome do corretor',
