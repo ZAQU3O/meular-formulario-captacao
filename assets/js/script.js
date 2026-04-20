@@ -349,7 +349,98 @@ sendWhatsAppButton.addEventListener('click', () => {
   showFeedback('WhatsApp aberto com a mensagem preenchida.');
 });
 
-savePdfButton.addEventListener('click', () => {
-  globalThis.print();
-  showFeedback('A janela de impressão foi aberta. Escolha Salvar como PDF.');
+// --- PDF estruturado com jsPDF ---
+savePdfButton.addEventListener('click', async () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const cfg = getConfig();
+  const formData = collectFormData();
+  const protocolo = protocolValue.textContent;
+  const dataHora = timestampValue.textContent;
+
+  // Logo
+  let logoBase64 = cfg.logoUrl;
+  if (!logoBase64) {
+    // fallback: pega logo padrão
+    try {
+      const img = document.querySelector('.brand-image, #loginLogo, #adminLogoImg');
+      if (img && img.src.startsWith('data:')) logoBase64 = img.src;
+    } catch {}
+  }
+  if (logoBase64) {
+    doc.addImage(logoBase64, 'PNG', 80, 10, 50, 20);
+  }
+
+  // Título
+  doc.setFontSize(18);
+  doc.setTextColor('#241b14');
+  doc.text(cfg.formTitulo || 'Ficha de Captação', 105, 40, { align: 'center' });
+
+  // Protocolo e data
+  doc.setFontSize(11);
+  doc.setTextColor('#444');
+  doc.text(`Protocolo: ${protocolo}`, 20, 50);
+  doc.text(`Data/Hora: ${dataHora}`, 140, 50);
+
+  // Dados principais
+  let y = 60;
+  doc.setFontSize(13);
+  doc.setTextColor('#c9a36a');
+  doc.text('Dados do Proprietário', 20, y);
+  doc.setFontSize(11);
+  doc.setTextColor('#241b14');
+  y += 7;
+  const camposProprietario = [
+    'proprietario','cpf','rg','email','celular','estadoCivil','conjuge','rgConjuge','emailConjuge'
+  ];
+  camposProprietario.forEach((key) => {
+    if (formData[key]) {
+      doc.text(`${labelMap[key]}: ${formData[key]}`, 20, y);
+      y += 6;
+    }
+  });
+  y += 2;
+  doc.setFontSize(13);
+  doc.setTextColor('#c9a36a');
+  doc.text('Dados do Imóvel', 20, y);
+  doc.setFontSize(11);
+  doc.setTextColor('#241b14');
+  y += 7;
+  const camposImovel = [
+    'endereco','bairro','cep','condominio','unidade','matricula','valor','tipoImovel','descricaoImovel','observacoes','exclusividade'
+  ];
+  camposImovel.forEach((key) => {
+    if (formData[key]) {
+      doc.text(`${labelMap[key]}: ${formData[key]}`, 20, y);
+      y += 6;
+    }
+  });
+
+  // Assinaturas
+  y += 10;
+  doc.setFontSize(13);
+  doc.setTextColor('#c9a36a');
+  doc.text('Assinaturas', 20, y);
+  y += 5;
+  const assinaturaProp = document.getElementById('assinaturaProprietarioImagem').value;
+  const assinaturaImob = document.getElementById('assinaturaImobiliariaImagem').value;
+  if (assinaturaProp) {
+    doc.addImage(assinaturaProp, 'PNG', 20, y, 60, 24);
+    doc.setFontSize(10);
+    doc.setTextColor('#241b14');
+    doc.text('Proprietário', 20, y + 28);
+  }
+  if (assinaturaImob) {
+    doc.addImage(assinaturaImob, 'PNG', 120, y, 60, 24);
+    doc.setFontSize(10);
+    doc.setTextColor('#241b14');
+    doc.text(cfg.formBrandNome || 'Imobiliária', 120, y + 28);
+  }
+
+  // Rodapé
+  doc.setFontSize(9);
+  doc.setTextColor('#888');
+  doc.text(cfg.formBrandDesc || '', 20, 285);
+
+  doc.save(`ficha-captacao-${protocolo}.pdf`);
 });
