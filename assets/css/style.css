@@ -152,6 +152,17 @@ textarea {
   color: #334155;
 }
 
+.autorizacao-texto {
+  margin: 0;
+  padding: 14px 18px;
+  background: #fdfaf5;
+  border-left: 4px solid var(--primary);
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #334155;
+}
+
 .channel-card {
   background: linear-gradient(180deg, #fffdf9 0%, #fff8ef 100%);
 }
