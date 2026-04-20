@@ -352,95 +352,252 @@ sendWhatsAppButton.addEventListener('click', () => {
 // --- PDF estruturado com jsPDF ---
 savePdfButton.addEventListener('click', async () => {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const cfg = getConfig();
   const formData = collectFormData();
   const protocolo = protocolValue.textContent;
   const dataHora = timestampValue.textContent;
 
-  // Logo
-  let logoBase64 = cfg.logoUrl;
-  if (!logoBase64) {
-    // fallback: pega logo padrão
-    try {
-      const img = document.querySelector('.brand-image, #loginLogo, #adminLogoImg');
-      if (img && img.src.startsWith('data:')) logoBase64 = img.src;
-    } catch {}
+  // ─── Cores ────────────────────────────────────────────────────────────────
+  const DARK   = [36, 27, 20];
+  const GOLD   = [201, 163, 106];
+  const GOLD2  = [180, 140, 80];
+  const WHITE  = [255, 255, 255];
+  const LIGHT  = [253, 250, 245];
+  const GRAY   = [100, 100, 100];
+  const LINE   = [226, 213, 195];
+
+  const PW = 210; // largura A4
+  const ML = 15;  // margem esquerda
+  const MR = 15;  // margem direita
+  const CW = PW - ML - MR; // largura útil
+
+  // ─── Logo (base64) ────────────────────────────────────────────────────────
+  async function loadLogo() {
+    if (cfg.logoUrl) return cfg.logoUrl;
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = img.width; c.height = img.height;
+        c.getContext('2d').drawImage(img, 0, 0);
+        resolve(c.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(null);
+      img.src = 'assets/img/logo.png';
+    });
   }
+
+  const logoBase64 = await loadLogo();
+
+  // ─── CABEÇALHO ─────────────────────────────────────────────────────────────
+  // Fundo escuro
+  doc.setFillColor(...DARK);
+  doc.rect(0, 0, PW, 52, 'F');
+  // Faixa dourada no topo
+  doc.setFillColor(...GOLD);
+  doc.rect(0, 0, PW, 2, 'F');
+  // Faixa dourada na base do cabeçalho
+  doc.setFillColor(...GOLD);
+  doc.rect(0, 52, PW, 1, 'F');
+
+  // Logo centrada
   if (logoBase64) {
-    doc.addImage(logoBase64, 'PNG', 80, 10, 50, 20);
+    const lw = 38, lh = 16;
+    doc.addImage(logoBase64, 'PNG', (PW - lw) / 2, 8, lw, lh);
   }
 
-  // Título
-  doc.setFontSize(18);
-  doc.setTextColor('#241b14');
-  doc.text(cfg.formTitulo || 'Ficha de Captação', 105, 40, { align: 'center' });
+  // Nome da imobiliária
+  doc.setFontSize(8);
+  doc.setTextColor(...GOLD);
+  doc.setFont('helvetica', 'normal');
+  doc.text((cfg.formBrandNome || 'meular imóveis').toUpperCase(), PW / 2, 33, { align: 'center', charSpace: 2 });
 
-  // Protocolo e data
-  doc.setFontSize(11);
-  doc.setTextColor('#444');
-  doc.text(`Protocolo: ${protocolo}`, 20, 50);
-  doc.text(`Data/Hora: ${dataHora}`, 140, 50);
+  // Título do documento
+  doc.setFontSize(14);
+  doc.setTextColor(...WHITE);
+  doc.setFont('helvetica', 'bold');
+  doc.text(cfg.formTitulo || 'FICHA DE CAPTAÇÃO', PW / 2, 43, { align: 'center' });
 
-  // Dados principais
-  let y = 60;
-  doc.setFontSize(13);
-  doc.setTextColor('#c9a36a');
-  doc.text('Dados do Proprietário', 20, y);
-  doc.setFontSize(11);
-  doc.setTextColor('#241b14');
-  y += 7;
-  const camposProprietario = [
-    'proprietario','cpf','rg','email','celular','estadoCivil','conjuge','rgConjuge','emailConjuge'
-  ];
-  camposProprietario.forEach((key) => {
-    if (formData[key]) {
-      doc.text(`${labelMap[key]}: ${formData[key]}`, 20, y);
-      y += 6;
+  // ─── META INFO (protocolo + data) ─────────────────────────────────────────
+  doc.setFillColor(...LIGHT);
+  doc.rect(0, 53, PW, 14, 'F');
+
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.setFont('helvetica', 'normal');
+  doc.text('PROTOCOLO', ML, 60);
+  doc.text('DATA / HORÁRIO', PW / 2 + 5, 60);
+
+  doc.setFontSize(10);
+  doc.setTextColor(...DARK);
+  doc.setFont('helvetica', 'bold');
+  doc.text(protocolo, ML, 65);
+  doc.text(dataHora, PW / 2 + 5, 65);
+
+  doc.setDrawColor(...LINE);
+  doc.setLineWidth(0.3);
+  doc.line(0, 67, PW, 67);
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  let y = 72;
+
+  function checkPage(needed = 10) {
+    if (y + needed > 278) {
+      doc.addPage();
+      // mini cabeçalho na nova página
+      doc.setFillColor(...DARK);
+      doc.rect(0, 0, PW, 12, 'F');
+      doc.setFillColor(...GOLD);
+      doc.rect(0, 12, PW, 0.8, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(...GOLD);
+      doc.setFont('helvetica', 'bold');
+      doc.text(cfg.formTitulo || 'Ficha de Captação', PW / 2, 8, { align: 'center' });
+      y = 20;
     }
-  });
-  y += 2;
-  doc.setFontSize(13);
-  doc.setTextColor('#c9a36a');
-  doc.text('Dados do Imóvel', 20, y);
-  doc.setFontSize(11);
-  doc.setTextColor('#241b14');
-  y += 7;
-  const camposImovel = [
-    'endereco','bairro','cep','condominio','unidade','matricula','valor','tipoImovel','descricaoImovel','observacoes','exclusividade'
-  ];
-  camposImovel.forEach((key) => {
-    if (formData[key]) {
-      doc.text(`${labelMap[key]}: ${formData[key]}`, 20, y);
-      y += 6;
-    }
-  });
+  }
 
-  // Assinaturas
-  y += 10;
-  doc.setFontSize(13);
-  doc.setTextColor('#c9a36a');
-  doc.text('Assinaturas', 20, y);
-  y += 5;
+  function drawSectionHeader(titulo) {
+    checkPage(14);
+    doc.setFillColor(...DARK);
+    doc.rect(ML, y, CW, 7, 'F');
+    doc.setFillColor(...GOLD);
+    doc.rect(ML, y, 3, 7, 'F');
+    doc.setFontSize(9);
+    doc.setTextColor(...WHITE);
+    doc.setFont('helvetica', 'bold');
+    doc.text(titulo.toUpperCase(), ML + 6, y + 4.8);
+    y += 10;
+  }
+
+  function drawRow(label, value, shade) {
+    const rowH = 6.5;
+    const lines = doc.splitTextToSize(String(value), CW * 0.6);
+    const h = Math.max(rowH, lines.length * 5);
+    checkPage(h + 2);
+
+    if (shade) {
+      doc.setFillColor(248, 244, 238);
+      doc.rect(ML, y - 4.5, CW, h, 'F');
+    }
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(...GRAY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, ML + 2, y);
+
+    doc.setFontSize(9);
+    doc.setTextColor(...DARK);
+    doc.setFont('helvetica', 'bold');
+    doc.text(lines, ML + CW * 0.38, y);
+
+    doc.setDrawColor(...LINE);
+    doc.setLineWidth(0.2);
+    doc.line(ML, y + h - 4, ML + CW, y + h - 4);
+
+    y += h;
+  }
+
+  function drawSection(titulo, campos) {
+    const rows = campos.filter(k => formData[k]);
+    if (!rows.length) return;
+    drawSectionHeader(titulo);
+    rows.forEach((key, i) => drawRow(labelMap[key] || key, formData[key], i % 2 === 0));
+    y += 5;
+  }
+
+  // ─── DADOS DO CORRETOR ────────────────────────────────────────────────────
+  drawSection('Dados do Corretor', ['corretor', 'dataCaptacao']);
+
+  // ─── DADOS DO PROPRIETÁRIO ────────────────────────────────────────────────
+  drawSection('Dados do Proprietário', [
+    'proprietario','cpf','rg','email','celular','estadoCivil',
+    'conjuge','rgConjuge','emailConjuge'
+  ]);
+
+  // ─── DADOS DO IMÓVEL ──────────────────────────────────────────────────────
+  drawSection('Dados do Imóvel', [
+    'tipoImovel','endereco','bairro','cep','condominio','unidade',
+    'matricula','valor','exclusividade','descricaoImovel','observacoes'
+  ]);
+
+  // ─── TERMO DE AUTORIZAÇÃO ─────────────────────────────────────────────────
+  checkPage(30);
+  drawSectionHeader('Termo de Autorização');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GRAY);
+  doc.setFont('helvetica', 'normal');
+  const termoTexto = `Autorizo ALTO PADRÃO inscrita sob o CRECI 0481 J, CNPJ n° 26.812.766/0001-64, estabelecida à Avenida Lindolfo Monteiro, 1210 — Fátima, Teresina/PI a efetuar a operação de venda de imóvel de propriedade, acima qualificado.`;
+  const termoLines = doc.splitTextToSize(termoTexto, CW - 4);
+  doc.text(termoLines, ML + 2, y);
+  y += termoLines.length * 5 + 6;
+
+  // ─── ASSINATURAS ──────────────────────────────────────────────────────────
+  checkPage(50);
+  drawSectionHeader('Assinaturas');
+
   const assinaturaProp = document.getElementById('assinaturaProprietarioImagem').value;
   const assinaturaImob = document.getElementById('assinaturaImobiliariaImagem').value;
+  const boxW = (CW - 10) / 2;
+  const boxH = 30;
+  const xProp = ML;
+  const xImob = ML + boxW + 10;
+
+  // Caixas de assinatura
+  doc.setDrawColor(...LINE);
+  doc.setFillColor(252, 249, 244);
+  doc.setLineWidth(0.4);
+  doc.rect(xProp, y, boxW, boxH, 'FD');
+  doc.rect(xImob, y, boxW, boxH, 'FD');
+
+  // Faixa de título das caixas
+  doc.setFillColor(...GOLD2);
+  doc.rect(xProp, y, boxW, 5, 'F');
+  doc.rect(xImob, y, boxW, 5, 'F');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...WHITE);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PROPRIETÁRIO', xProp + boxW / 2, y + 3.5, { align: 'center' });
+  doc.text('RESPONSÁVEL DA IMOBILIÁRIA', xImob + boxW / 2, y + 3.5, { align: 'center' });
+
+  // Imagens das assinaturas
   if (assinaturaProp) {
-    doc.addImage(assinaturaProp, 'PNG', 20, y, 60, 24);
-    doc.setFontSize(10);
-    doc.setTextColor('#241b14');
-    doc.text('Proprietário', 20, y + 28);
+    doc.addImage(assinaturaProp, 'PNG', xProp + 4, y + 7, boxW - 8, 18);
   }
   if (assinaturaImob) {
-    doc.addImage(assinaturaImob, 'PNG', 120, y, 60, 24);
-    doc.setFontSize(10);
-    doc.setTextColor('#241b14');
-    doc.text(cfg.formBrandNome || 'Imobiliária', 120, y + 28);
+    doc.addImage(assinaturaImob, 'PNG', xImob + 4, y + 7, boxW - 8, 18);
   }
 
-  // Rodapé
-  doc.setFontSize(9);
-  doc.setTextColor('#888');
-  doc.text(cfg.formBrandDesc || '', 20, 285);
+  // Nomes abaixo das caixas
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.setFont('helvetica', 'normal');
+  const nomeProp = formData['assinaturaProprietario'] || formData['proprietario'] || '';
+  const nomeImob = formData['assinaturaImobiliaria'] || cfg.formBrandNome || 'Imobiliária';
+  doc.text(nomeProp, xProp + boxW / 2, y + boxH + 5, { align: 'center' });
+  doc.text(nomeImob, xImob + boxW / 2, y + boxH + 5, { align: 'center' });
+
+  y += boxH + 10;
+
+  // ─── RODAPÉ ───────────────────────────────────────────────────────────────
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFillColor(...GOLD);
+    doc.rect(0, 289, PW, 0.8, 'F');
+    doc.setFillColor(...DARK);
+    doc.rect(0, 289.8, PW, 8, 'F');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GOLD);
+    doc.setFont('helvetica', 'normal');
+    doc.text(cfg.formBrandNome || 'meular imóveis', ML, 294.5);
+    doc.setTextColor(180, 170, 160);
+    doc.text(`Página ${i} de ${totalPages}`, PW - MR, 294.5, { align: 'right' });
+    doc.setTextColor(...GOLD);
+    doc.text(cfg.formBrandDesc || '', PW / 2, 294.5, { align: 'center' });
+  }
 
   doc.save(`ficha-captacao-${protocolo}.pdf`);
 });
