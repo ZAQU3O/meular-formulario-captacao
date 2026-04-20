@@ -14,10 +14,19 @@ Formulário profissional de captação imobiliária, 100% estático (HTML + CSS 
 - Envio automático de e-mail para a imobiliária via **EmailJS**
 - E-mail de confirmação automático para o proprietário (se informou e-mail)
 - Registro em **Google Sheets** via webhook (Google Apps Script)
-- Envio por **WhatsApp** com mensagem pré-formatada
-- Salvar em **PDF** via impressão do navegador
-- Modal de confirmação de envio com número de protocolo e horário
+- Modal de confirmação de envio com número de protocolo, horário e botões de **Salvar em PDF** e **Enviar por WhatsApp**
 - Formulário limpo automaticamente ao fechar o modal
+
+> Os botões "Salvar em PDF" e "Enviar por WhatsApp" aparecem **apenas após o envio da ficha**, na tela de confirmação.
+
+---
+
+## Segurança
+
+- **Painel admin protegido por HTTP Basic Auth** (usuário/senha definidos nas variáveis do Vercel)
+- **Senha do admin armazenada como hash SHA-256** no navegador (nunca em texto puro)
+- **Timeout de sessão:** logout automático após 30 min de inatividade
+- **Restrinja o domínio permitido no EmailJS** para evitar uso indevido da chave pública
 
 ---
 
@@ -46,6 +55,8 @@ Todas as configurações são salvas no `localStorage` do navegador e aplicadas 
 ```
 ├── index.html                          # Formulário principal
 ├── admin.html                          # Painel administrativo
+├── api/admin-auth.js                   # Proteção HTTP Basic Auth (Vercel)
+├── vercel.json                         # Rewrite para proteger o admin
 ├── assets/
 │   ├── css/style.css                   # Estilos
 │   ├── js/script.js                    # Lógica do formulário
