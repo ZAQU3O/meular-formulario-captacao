@@ -374,22 +374,22 @@ savePdfButton.addEventListener('click', async () => {
 
   // ─── Logo (base64) ────────────────────────────────────────────────────────
   async function loadLogo() {
-    if (cfg.logoUrl) return cfg.logoUrl;
+    const src = cfg.logoUrl || 'assets/img/logo.png';
     return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         const c = document.createElement('canvas');
-        c.width = img.width; c.height = img.height;
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
         c.getContext('2d').drawImage(img, 0, 0);
-        resolve(c.toDataURL('image/png'));
+        resolve({ base64: c.toDataURL('image/png'), nw: img.naturalWidth, nh: img.naturalHeight });
       };
       img.onerror = () => resolve(null);
-      img.src = 'assets/img/logo.png';
+      img.src = src;
     });
   }
 
-  const logoBase64 = await loadLogo();
+  const logoData = await loadLogo();
 
   // ─── CABEÇALHO ─────────────────────────────────────────────────────────────
   // Fundo escuro
@@ -402,17 +402,24 @@ savePdfButton.addEventListener('click', async () => {
   doc.setFillColor(...GOLD);
   doc.rect(0, 52, PW, 1, 'F');
 
-  // Logo centrada
-  if (logoBase64) {
-    const lw = 38, lh = 16;
-    doc.addImage(logoBase64, 'PNG', (PW - lw) / 2, 8, lw, lh);
+  // Logo centrada mantendo proporção
+  if (logoData) {
+    const maxH = 18, maxW = 70;
+    let lh = maxH, lw = maxW;
+    if (logoData.nw && logoData.nh) {
+      const ratio = logoData.nw / logoData.nh;
+      lh = maxH;
+      lw = lh * ratio;
+      if (lw > maxW) { lw = maxW; lh = lw / ratio; }
+    }
+    doc.addImage(logoData.base64, 'PNG', (PW - lw) / 2, (28 - lh) / 2, lw, lh);
   }
 
   // Nome da imobiliária
   doc.setFontSize(8);
   doc.setTextColor(...GOLD);
-  doc.setFont('helvetica', 'normal');
-  doc.text((cfg.formBrandNome || 'meular imóveis').toUpperCase(), PW / 2, 33, { align: 'center', charSpace: 2 });
+  doc.setFont('helvetica', 'bold');
+  doc.text((cfg.formBrandNome || 'meular imóveis').toUpperCase(), PW / 2, 34, { align: 'center' });
 
   // Título do documento
   doc.setFontSize(14);
