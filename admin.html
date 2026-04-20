@@ -442,7 +442,7 @@
           </div>
           <div class="field">
             <label for="cfgBrandDesc">Slogan / descrição do card</label>
-            <input type="text" id="cfgBrandDesc" placeholder="Atendimento imobiliário..." />
+            <input type="text" id="cfgBrandDesc" placeholder="Atendimento imobiliário com apresentação elegante e prática." />
           </div>
         </div>
         <button type="submit" class="btn-primary">Salvar textos</button>
@@ -516,6 +516,27 @@
     const EMAILJS_TEMPLATE_ID = 'template_74ix2rt';
     const EMAILJS_PUBLIC_KEY  = 'Tp3KkqmXfULnu2dl2';
     const SESSION_TIMEOUT_MS  = 30 * 60 * 1000; // 30 minutos
+
+    // ─── Helpers de senha (SHA-256) ──────────────────────────────────────────────
+    async function hashStr(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function isHash(str) {
+      return typeof str === 'string' && /^[0-9a-f]{64}$/.test(str);
+    }
+
+    async function migratePassword() {
+      try {
+        const cfg = getConfig();
+        const stored = cfg.adminPassword || DEFAULTS.adminPassword;
+        if (!isHash(stored)) {
+          const hashed = await hashStr(stored);
+          saveConfig({ adminPassword: hashed });
+        }
+      } catch (e) { /* silencioso */ }
+    }
 
     const DEFAULTS = {
       email:            'bartworld14@gmail.com',
@@ -628,11 +649,20 @@
     }
 
     // ─── LOGIN ───────────────────────────────────────────────────────────────────
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const pass = document.getElementById('adminPassword').value;
       const cfg  = getConfig();
-      if (pass === (cfg.adminPassword || DEFAULTS.adminPassword)) {
+      const stored = cfg.adminPassword || DEFAULTS.adminPassword;
+
+      let isValid = false;
+      if (isHash(stored)) {
+        isValid = (await hashStr(pass)) === stored;
+      } else {
+        isValid = pass === stored; // fallback durante migração
+      }
+
+      if (isValid) {
         document.getElementById('loginPanel').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
         loadConfig();
@@ -763,15 +793,22 @@
     });
 
     // ─── 4. TROCAR SENHA ─────────────────────────────────────────────────────────
-    document.getElementById('formSenha').addEventListener('submit', function (e) {
+    document.getElementById('formSenha').addEventListener('submit', async function (e) {
       e.preventDefault();
-      const cfg          = getConfig();
-      const senhaAtual   = document.getElementById('cfgSenhaAtual').value;
-      const novaSenha    = document.getElementById('cfgNovaSenha').value;
-      const confirmar    = document.getElementById('cfgConfirmarSenha').value;
-      const passwordAtual = cfg.adminPassword || DEFAULTS.adminPassword;
+      const cfg           = getConfig();
+      const senhaAtual    = document.getElementById('cfgSenhaAtual').value;
+      const novaSenha     = document.getElementById('cfgNovaSenha').value;
+      const confirmar     = document.getElementById('cfgConfirmarSenha').value;
+      const storedHash    = cfg.adminPassword || DEFAULTS.adminPassword;
 
-      if (senhaAtual !== passwordAtual) {
+      // Validar senha atual com hash
+      let senhaOk = false;
+      if (isHash(storedHash)) {
+        senhaOk = (await hashStr(senhaAtual)) === storedHash;
+      } else {
+        senhaOk = senhaAtual === storedHash;
+      }
+      if (!senhaOk) {
         showAlert('error', 'Senha atual incorreta.');
         return;
       }
@@ -783,9 +820,10 @@
         showAlert('error', 'As senhas não coincidem.');
         return;
       }
-      saveConfig({ adminPassword: novaSenha });
-      document.getElementById('cfgSenhaAtual').value   = '';
-      document.getElementById('cfgNovaSenha').value    = '';
+      const novaSenhaHash = await hashStr(novaSenha);
+      saveConfig({ adminPassword: novaSenhaHash });
+      document.getElementById('cfgSenhaAtual').value     = '';
+      document.getElementById('cfgNovaSenha').value      = '';
       document.getElementById('cfgConfirmarSenha').value = '';
       showAlert('success', 'Senha alterada com sucesso!');
     });
@@ -843,6 +881,10 @@
     });
 
     sessionInterval = setInterval(tickSession, 1000);
+
+
+    // Migrar senha para hash SHA-256 na primeira visita
+    migratePassword();
 
   })();
   </script>

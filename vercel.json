@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/admin.html", "destination": "/api/admin-auth" }
+  ]
+}
