@@ -379,6 +379,16 @@ button.secondary {
   color: #241b14;
 }
 
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.confirm-actions button {
+  flex: 1;
+}
+
 .confirm-close {
   background: #c9a36a;
   color: #241b14;
