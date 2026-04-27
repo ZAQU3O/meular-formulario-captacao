@@ -41,9 +41,9 @@ const WEBHOOK_PLANILHA = () => getConfig().webhook;
 const WHATSAPP_DESTINO = () => getConfig().whatsapp;
 
 // ─── EmailJS config ───────────────────────────────────────────────────────────
-const EMAILJS_SERVICE_ID = 'service_935b0pu';
-const EMAILJS_TEMPLATE_ID = 'template_74ix2rt';
-const EMAILJS_PUBLIC_KEY = 'Tp3KkqmXfULnu2dl2';
+const EMAILJS_SERVICE_ID = 'service_klld4pl';
+const EMAILJS_TEMPLATE_ID = 'template_qom9z9i';
+const EMAILJS_PUBLIC_KEY = 'ZMn2Nlbz18A-cqelI';
 
 function buildEmailJsTable(data) {
   // Gera tabela HTML para o campo {{conteudo}}
