@@ -53,9 +53,6 @@
           <label>Nome do Proprietário*
             <input type="text" name="proprietario" required />
           </label>
-          <label>RG
-            <input type="text" name="rg" />
-          </label>
           <label>E-mail
             <input type="email" name="email" />
           </label>
@@ -73,22 +70,6 @@
               <option>Divorciado(a)</option>
               <option>Viúvo(a)</option>
               <option>União estável</option>
-            </select>
-          </label>
-          <label>Nome do cônjuge
-            <input type="text" name="conjuge" />
-          </label>
-          <label>RG do cônjuge
-            <input type="text" name="rgConjuge" />
-          </label>
-          <label>E-mail do cônjuge
-            <input type="email" name="emailConjuge" />
-          </label>
-          <label>Em caráter de EXCLUSIVIDADE
-            <select name="exclusividade">
-              <option value="">Selecione...</option>
-              <option>Sim</option>
-              <option>Não</option>
             </select>
           </label>
         </div>
@@ -112,17 +93,8 @@
           <label>CEP
             <input type="text" name="cep" />
           </label>
-          <label>Matrícula do Imóvel
-            <input type="text" name="matricula" />
-          </label>
           <label>Valor do Imóvel
             <input type="number" name="valor" min="0" step="0.01" />
-          </label>
-          <label>CPF
-            <input type="text" name="cpfImovel" placeholder="000.000.000-00" />
-          </label>
-          <label>Celular
-            <input type="tel" name="celularImovel" placeholder="(00) 00000-0000" />
           </label>
           <label>Tipo do Imóvel
             <select name="tipoImovel">
@@ -142,15 +114,6 @@
       </section>
 
       <section class="card full">
-        <h2>Condições Comerciais</h2>
-        <p class="terms">
-          Autorizo a <strong>Meular Imóveis</strong> a intermediar a venda do imóvel descrito neste formulário.
-          Pela conclusão do negócio, fica estipulado honorários de <strong>5%</strong> sobre o valor final da venda,
-          válidos durante o prazo de captação acordado entre as partes.
-        </p>
-      </section>
-
-      <section class="card full">
         <h2>Observações</h2>
         <label>Observações gerais
           <textarea name="observacoes" rows="5" placeholder="Informações adicionais sobre o imóvel, negociação ou condições especiais..."></textarea>
@@ -160,21 +123,25 @@
       <section class="card full signatures">
         <h2>Assinaturas</h2>
         <div class="grid cols-2">
-          <div class="signature-block">
+          <label class="full-width">Em caráter de EXCLUSIVIDADE
+            <select name="exclusividade">
+              <option value="">Selecione...</option>
+              <option>Sim</option>
+              <option>Não</option>
+            </select>
+          </label>
+          <p class="terms full-width">
+            Autorizo a <strong>Meular Imóveis</strong> a intermediar a venda do imóvel descrito neste formulário.
+            Pela conclusão do negócio, fica estipulado honorários de <strong>5%</strong> sobre o valor final da venda,
+            válidos durante o prazo de captação acordado entre as partes.
+          </p>
+          <div class="signature-block full-width">
             <label for="assinaturaNomeProprietario">Nome do proprietário</label>
             <input id="assinaturaNomeProprietario" type="text" name="assinaturaProprietario" placeholder="Nome completo" />
             <p class="signature-help">Assine no quadro abaixo com o dedo ou mouse.</p>
             <canvas id="signaturePadProprietario" class="signature-pad" width="460" height="180"></canvas>
             <input type="hidden" name="assinaturaProprietarioImagem" id="assinaturaProprietarioImagem" />
             <button type="button" class="secondary clear-signature" data-target="signaturePadProprietario">Limpar assinatura</button>
-          </div>
-          <div class="signature-block">
-            <label for="assinaturaNomeImobiliaria">Responsável da imobiliária</label>
-            <input id="assinaturaNomeImobiliaria" type="text" name="assinaturaImobiliaria" placeholder="Responsável" />
-            <p class="signature-help">Assine no quadro abaixo com o dedo ou mouse.</p>
-            <canvas id="signaturePadImobiliaria" class="signature-pad" width="460" height="180"></canvas>
-            <input type="hidden" name="assinaturaImobiliariaImagem" id="assinaturaImobiliariaImagem" />
-            <button type="button" class="secondary clear-signature" data-target="signaturePadImobiliaria">Limpar assinatura</button>
           </div>
         </div>
       </section>

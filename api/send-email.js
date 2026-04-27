@@ -4,31 +4,22 @@ const labelMap = {
   corretor: 'Nome do corretor',
   dataCaptacao: 'Data da captação',
   proprietario: 'Nome do proprietário',
-  rg: 'RG',
   email: 'E-mail',
   cpf: 'CPF',
   celular: 'Celular',
   estadoCivil: 'Estado civil',
-  conjuge: 'Nome do cônjuge',
-  rgConjuge: 'RG do cônjuge',
-  emailConjuge: 'E-mail do cônjuge',
   exclusividade: 'Exclusividade',
   endereco: 'Endereço',
   condominio: 'Condomínio',
   unidade: 'Unidade',
   bairro: 'Bairro',
   cep: 'CEP',
-  matricula: 'Matrícula do imóvel',
   valor: 'Valor do imóvel',
-  cpfImovel: 'CPF adicional',
-  celularImovel: 'Celular adicional',
   tipoImovel: 'Tipo do imóvel',
   descricaoImovel: 'Descrição do imóvel',
   observacoes: 'Observações',
   assinaturaProprietario: 'Nome da assinatura do proprietário',
-  assinaturaImobiliaria: 'Nome da assinatura da imobiliária',
-  assinaturaProprietarioCapturada: 'Assinatura do proprietário capturada',
-  assinaturaImobiliariaCapturada: 'Assinatura da imobiliária capturada'
+  assinaturaProprietarioCapturada: 'Assinatura do proprietário capturada'
 };
 
 function normalizePayload(body) {

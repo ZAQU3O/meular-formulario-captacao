@@ -65,29 +65,21 @@ const labelMap = {
   corretor: 'Nome do corretor',
   dataCaptacao: 'Data da captação',
   proprietario: 'Nome do proprietário',
-  rg: 'RG',
   email: 'E-mail',
   cpf: 'CPF',
   celular: 'Celular',
   estadoCivil: 'Estado civil',
-  conjuge: 'Nome do cônjuge',
-  rgConjuge: 'RG do cônjuge',
-  emailConjuge: 'E-mail do cônjuge',
   exclusividade: 'Exclusividade',
   endereco: 'Endereço',
   condominio: 'Condomínio',
   unidade: 'Unidade',
   bairro: 'Bairro',
   cep: 'CEP',
-  matricula: 'Matrícula do imóvel',
   valor: 'Valor do imóvel',
-  cpfImovel: 'CPF adicional',
-  celularImovel: 'Celular adicional',
   tipoImovel: 'Tipo do imóvel',
   descricaoImovel: 'Descrição do imóvel',
   observacoes: 'Observações',
   assinaturaProprietario: 'Nome da assinatura do proprietário',
-  assinaturaImobiliaria: 'Nome da assinatura da imobiliária',
 };
 
 function generateProtocol() {
@@ -184,10 +176,7 @@ function setupSignaturePad(canvasId, inputId) {
 
 function collectFormData() {
   const rawData = Object.fromEntries(new FormData(form).entries());
-  const excludedKeys = new Set([
-    'assinaturaProprietarioImagem',
-    'assinaturaImobiliariaImagem',
-  ]);
+  const excludedKeys = new Set(['assinaturaProprietarioImagem']);
   const data = {};
 
   Object.entries(rawData).forEach(([key, value]) => {
@@ -197,7 +186,6 @@ function collectFormData() {
   });
 
   data.assinaturaProprietarioCapturada = rawData.assinaturaProprietarioImagem ? 'Sim' : 'Não';
-  data.assinaturaImobiliariaCapturada = rawData.assinaturaImobiliariaImagem ? 'Sim' : 'Não';
 
   return data;
 }
@@ -209,13 +197,11 @@ function formatFormData(data) {
 }
 
 const assinaturaProprietario = setupSignaturePad('signaturePadProprietario', 'assinaturaProprietarioImagem');
-const assinaturaImobiliaria = setupSignaturePad('signaturePadImobiliaria', 'assinaturaImobiliariaImagem');
 
 document.querySelectorAll('.clear-signature').forEach((button) => {
   button.addEventListener('click', () => {
     const target = button.dataset.target;
     if (target === 'signaturePadProprietario') assinaturaProprietario.clear();
-    if (target === 'signaturePadImobiliaria') assinaturaImobiliaria.clear();
   });
 });
 
@@ -224,29 +210,21 @@ fillTestDataButton.addEventListener('click', () => {
     corretor: 'Corretor Teste',
     dataCaptacao: '2026-04-14',
     proprietario: 'João da Silva',
-    rg: '1234567',
     email: 'joao@email.com',
     cpf: '123.456.789-00',
     celular: '(89) 99999-1111',
     estadoCivil: 'Casado(a)',
-    conjuge: 'Maria da Silva',
-    rgConjuge: '7654321',
-    emailConjuge: 'maria@email.com',
     exclusividade: 'Sim',
     endereco: 'Rua das Flores, 100',
     condominio: 'Residencial Jardim',
     unidade: '12B',
     bairro: 'Centro',
     cep: '64000-000',
-    matricula: 'MAT123456',
     valor: '450000',
-    cpfImovel: '123.456.789-00',
-    celularImovel: '(89) 98888-2222',
     tipoImovel: 'Casa',
     descricaoImovel: 'Imóvel com 3 quartos, suíte, garagem e área gourmet.',
     observacoes: 'Cliente disponível para visitas no período da tarde.',
     assinaturaProprietario: 'João da Silva',
-    assinaturaImobiliaria: 'Responsável Meular',
   };
 
   Object.entries(sampleData).forEach(([key, value]) => {
@@ -520,14 +498,13 @@ savePdfButton.addEventListener('click', async () => {
 
   // ─── DADOS DO PROPRIETÁRIO ────────────────────────────────────────────────
   drawSection('Dados do Proprietário', [
-    'proprietario','cpf','rg','email','celular','estadoCivil',
-    'conjuge','rgConjuge','emailConjuge'
+    'proprietario','cpf','email','celular','estadoCivil'
   ]);
 
   // ─── DADOS DO IMÓVEL ──────────────────────────────────────────────────────
   drawSection('Dados do Imóvel', [
     'tipoImovel','endereco','bairro','cep','condominio','unidade',
-    'matricula','valor','exclusividade','descricaoImovel','observacoes'
+    'valor','descricaoImovel','observacoes'
   ]);
 
   // ─── TERMO DE AUTORIZAÇÃO ─────────────────────────────────────────────────
@@ -546,45 +523,48 @@ savePdfButton.addEventListener('click', async () => {
   drawSectionHeader('Assinaturas');
 
   const assinaturaProp = document.getElementById('assinaturaProprietarioImagem').value;
-  const assinaturaImob = document.getElementById('assinaturaImobiliariaImagem').value;
-  const boxW = (CW - 10) / 2;
+  if (formData.exclusividade) {
+    drawRow('Exclusividade', formData.exclusividade, true);
+    y += 3;
+  }
+
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GRAY);
+  doc.setFont('helvetica', 'normal');
+  const condicoesTexto = 'Autorizo a Meular Imóveis a intermediar a venda do imóvel descrito neste formulário. Pela conclusão do negócio, fica estipulado honorários de 5% sobre o valor final da venda, válidos durante o prazo de captação acordado entre as partes.';
+  const condicoesLines = doc.splitTextToSize(condicoesTexto, CW - 4);
+  doc.text(condicoesLines, ML + 2, y);
+  y += condicoesLines.length * 5 + 8;
+
+  const boxW = CW;
   const boxH = 30;
   const xProp = ML;
-  const xImob = ML + boxW + 10;
 
-  // Caixas de assinatura
+  // Caixa de assinatura
   doc.setDrawColor(...LINE);
   doc.setFillColor(252, 249, 244);
   doc.setLineWidth(0.4);
   doc.rect(xProp, y, boxW, boxH, 'FD');
-  doc.rect(xImob, y, boxW, boxH, 'FD');
 
-  // Faixa de título das caixas
+  // Faixa de título da caixa
   doc.setFillColor(...GOLD2);
   doc.rect(xProp, y, boxW, 5, 'F');
-  doc.rect(xImob, y, boxW, 5, 'F');
   doc.setFontSize(7.5);
   doc.setTextColor(...WHITE);
   doc.setFont('helvetica', 'bold');
   doc.text('PROPRIETÁRIO', xProp + boxW / 2, y + 3.5, { align: 'center' });
-  doc.text('RESPONSÁVEL DA IMOBILIÁRIA', xImob + boxW / 2, y + 3.5, { align: 'center' });
 
-  // Imagens das assinaturas
+  // Imagem da assinatura
   if (assinaturaProp) {
     doc.addImage(assinaturaProp, 'PNG', xProp + 4, y + 7, boxW - 8, 18);
   }
-  if (assinaturaImob) {
-    doc.addImage(assinaturaImob, 'PNG', xImob + 4, y + 7, boxW - 8, 18);
-  }
 
-  // Nomes abaixo das caixas
+  // Nome abaixo da caixa
   doc.setFontSize(8);
   doc.setTextColor(...GRAY);
   doc.setFont('helvetica', 'normal');
   const nomeProp = formData['assinaturaProprietario'] || formData['proprietario'] || '';
-  const nomeImob = formData['assinaturaImobiliaria'] || cfg.formBrandNome || 'Imobiliária';
   doc.text(nomeProp, xProp + boxW / 2, y + boxH + 5, { align: 'center' });
-  doc.text(nomeImob, xImob + boxW / 2, y + boxH + 5, { align: 'center' });
 
   y += boxH + 10;
 
