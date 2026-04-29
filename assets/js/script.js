@@ -17,7 +17,7 @@ document.getElementById('closeModal').addEventListener('click', () => {
 const CONFIG_DEFAULTS = {
   email:           'meular711@gmail.com',
   whatsapp:        '5586994141738',
-  webhook:         'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec',
+  webhook:         'https://script.google.com/macros/s/AKfycbz8T5kMSLbIA4Xo2PyGatYsXLuEK9xZ_UYzf__eIbwuO3Ma1wf-Tn6Gxj4oxyhkKBaW/exec',
   nomeImobiliaria: 'Meular Imóveis',
   logoUrl:         '',
   formEyebrow:     'CAPTAÇÃO ONLINE',
