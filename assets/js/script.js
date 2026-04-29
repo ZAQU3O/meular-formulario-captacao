@@ -15,8 +15,8 @@ document.getElementById('closeModal').addEventListener('click', () => {
 
 // ─── Configurações da empresa (editáveis pelo admin) ─────────────────────────
 const CONFIG_DEFAULTS = {
-  email:           'bartworld14@gmail.com',
-  whatsapp:        '558994111573',
+  email:           'meular711@gmail.com',
+  whatsapp:        '5586994141738',
   webhook:         'https://script.google.com/macros/s/AKfycbyEyuUC3CuFYkUdU06ps1nAra_xaMqANDaH3XXcwDKbuLw0d_7cr-dMn7lrXHBmqE4hRQ/exec',
   nomeImobiliaria: 'Meular Imóveis',
   logoUrl:         '',
